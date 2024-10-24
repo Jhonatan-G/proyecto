@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Datos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .summary-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .summary-total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{index :: menu}"></div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center">Confirmar Datos</h2>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeExito}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeError}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Información del Usuario</h3>
+            <form id="confirmarDatosForm" th:action="@{/actualizar-datos}" method="post" th:object="${usuario}">
+                <input type="hidden" name="idUsuario" th:value="*{idUsuario}">
+
+                <div class="row mb-3">
+                    <label for="nombresUsuario" class="col-sm-2 col-form-label">Nombres</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="nombresUsuario" name="nombresUsuario" required
+                               pattern="[A-Za-zÀ-ÿ\s]+" title="Solo se permiten letras y espacios."
+                               th:value="*{nombresUsuario}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="apellidosUsuario" class="col-sm-2 col-form-label">Apellidos</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="apellidosUsuario" name="apellidosUsuario" required
+                               pattern="[A-Za-zÀ-ÿ\s]+" title="Solo se permiten letras y espacios."
+                               th:value="*{apellidosUsuario}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="celularUsuario" class="col-sm-2 col-form-label">Celular</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="celularUsuario" name="celularUsuario" required
+                               th:value="*{celularUsuario}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="direccionUsuario" class="col-sm-2 col-form-label">Dirección</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="direccionUsuario" name="direccionUsuario" required
+                               th:value="*{direccionUsuario}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="correoUsuario" class="col-sm-2 col-form-label">Correo</label>
+                    <div class="col-sm-10">
+                        <input type="email" class="form-control" id="correoUsuario" name="correoUsuario" required
+                               th:value="*{correoUsuario}">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="summary-box">
+                <h5>Resumen de la Orden</h5>
+                <p>Productos: <span id="total-productos">0</span></p>
+                <p>Subtotal: <span id="subtotal">$0</span></p>
+                <p class="summary-total">Total: <span id="total">$0</span></p>
+                <button class="btn btn-primary w-100" id="finalizar-compra" onclick="finalizarCompra()">Confirmar
+                    datos
+                </button>
+                <p class="me-3 mt-3 mb-2">Realiza tu pago seguro fácilmente con:</p>
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <img src="/nequi.png" alt="Nequi" style="width: 40px;">
+                        <p class="mb-0">Nequi</p>
+                    </div>
+                    <div class="me-3">
+                        <img src="daviplata.png" alt="Daviplata" style="width: 40px;">
+                        <p class="mb-0">Daviplata</p>
+                    </div>
+                    <div class="me-3">
+                        <img src="efectivo.png" alt="Efectivo" style="width: 40px;">
+                        <p class="mb-0">Efectivo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        actualizarCarrito();
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalProductos = 0;
+        let subtotal = 0;
+        Object.keys(cart).forEach(productId => {
+            let { cantidad, precio } = cart[productId];
+            subtotal += precio * cantidad;
+            totalProductos += cantidad;
+        });
+        document.getElementById('total-productos').innerText = totalProductos;
+        document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+        document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+    });
+
+    function finalizarCompra() {
+        const form = document.getElementById('confirmarDatosForm');
+        const originalValues = {
+            nombresUsuario: form.nombresUsuario.defaultValue,
+            apellidosUsuario: form.apellidosUsuario.defaultValue,
+            celularUsuario: form.celularUsuario.defaultValue,
+            direccionUsuario: form.direccionUsuario.defaultValue,
+            correoUsuario: form.correoUsuario.defaultValue
+        };
+        const currentValues = {
+            nombresUsuario: form.nombresUsuario.value,
+            apellidosUsuario: form.apellidosUsuario.value,
+            celularUsuario: form.celularUsuario.value,
+            direccionUsuario: form.direccionUsuario.value,
+            correoUsuario: form.correoUsuario.value
+        };
+        const hasChanges = Object.keys(originalValues).some(key => originalValues[key] !== currentValues[key]);
+        if (hasChanges) {
+            form.submit();
+        } else {
+            window.location.href = "/confirmar-metodo-entrega";
+        }
+    }
+
+    function actualizarCarrito() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
+        const cartCountElement = document.getElementById('cart-count');
+        cartCountElement.textContent = totalItems;
+    }
+
+    function formatoPrecio(precio) {
+        return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

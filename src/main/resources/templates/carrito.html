@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito Compras</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .product-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .cart-item:last-child {
+            border-bottom: none; /* Sin borde en el último elemento */
+        }
+        .cart-item .product-details {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+        .cart-item h5,
+        .cart-item p {
+            margin: 0;
+            padding: 0;
+        }
+        .cart-item .quantity-controls {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+        .quantity-controls input {
+            width: 50px;
+            text-align: center;
+        }
+        .summary-total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{index :: menu}"></div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center">Carrito Compras</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div id="carrito-items">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="summary-box">
+                <h5>Resumen de la Orden</h5>
+                <p>Productos: <span id="total-productos">0</span></p>
+                <p>Subtotal: <span id="subtotal">$0</span></p>
+                <p class="summary-total">Total: <span id="total">$0</span></p>
+                <a id="finalizarCompraBtn"
+                   class="btn btn-primary w-100"
+                   th:href="${usuario != null ? '/confirmar-datos-compra' : '#'}"
+                   th:data-bs-toggle="${usuario == null ? 'modal' : ''}"
+                   th:data-bs-target="${usuario == null ? '#loginModal' : ''}">
+                    Finalizar Compra
+                </a>
+                <p class="me-3 mt-3 mb-2">Realiza tu pago seguro fácilmente con:</p>
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <img src="/nequi.png" alt="Nequi" style="width: 40px;">
+                        <p class="mb-0">Nequi</p>
+                    </div>
+                    <div class="me-3">
+                        <img src="daviplata.png" alt="Daviplata" style="width: 40px;">
+                        <p class="mb-0">Daviplata</p>
+                    </div>
+                    <div class="me-3">
+                        <img src="efectivo.png" alt="Efectivo" style="width: 40px;">
+                        <p class="mb-0">Efectivo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">¿Ya tienes una cuenta?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Para continuar con tu compra, por favor inicia sesión o regístrate.</p>
+                <button type="button" class="btn btn-primary"
+                        onclick="window.location.href='/login?from=finalizarCompra'">Iniciar Sesión
+                </button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="window.location.href='/registrarse?from=finalizarCompra'">Registrarse
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        mostrarCarrito();
+        actualizarCarrito();
+    });
+
+    function mostrarCarrito() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let carritoContainer = document.getElementById('carrito-items');
+        carritoContainer.innerHTML = '';
+        let totalProductos = 0;
+        let subtotal = 0;
+        Object.keys(cart).forEach(productId => {
+            let { cantidad, nombre, precio, descripcion, imagen } = cart[productId];
+            subtotal += precio * cantidad;
+            carritoContainer.innerHTML += `
+                <div class="cart-item">
+                    <img src="${imagen}" class="product-img" alt="${nombre}">
+                    <div class="product-details">
+                        <h5>${nombre}</h5>
+                        <p>${descripcion}</p>
+                        <p class="text-danger fw-bold">$${formatoPrecio(precio)}</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity('${productId}')">-</button>
+                        <input type="number" class="form-control" value="${cantidad}" min="1" max="20" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity('${productId}')">+</button>
+                    </div>
+                    <button class="btn btn-danger ms-3" onclick="eliminarProducto('${productId}')">Eliminar</button>
+                </div>`;
+            totalProductos += cantidad;
+        });
+        document.getElementById('total-productos').innerText = totalProductos;
+        document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+        document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+    }
+
+    function actualizarCarrito() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
+        const cartCountElement = document.getElementById('cart-count');
+        cartCountElement.textContent = totalItems;
+    }
+
+    function decreaseQuantity(productId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        if (cart[productId].cantidad > 1) {
+            cart[productId].cantidad--;
+        } else {
+            delete cart[productId];
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        mostrarCarrito();
+        actualizarCarrito();
+    }
+
+    function increaseQuantity(productId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        if (cart[productId]) {
+            cart[productId].cantidad++;
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        mostrarCarrito();
+        actualizarCarrito();
+    }
+
+    function eliminarProducto(productId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        delete cart[productId];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        mostrarCarrito();
+        actualizarCarrito();
+    }
+
+    function formatoPrecio(precio) {
+        return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

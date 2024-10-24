@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<div th:replace="~{index :: menu}"></div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center">Editar Producto</h2>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeExito}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeError}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <form th:action="@{/editar-producto}" method="post" th:object="${producto}" enctype="multipart/form-data">
+        <input type="hidden" name="idProducto" th:value="*{idProducto}">
+
+        <div class="row mb-3">
+            <label for="categoriaProducto" class="col-sm-2 col-form-label">Categoría</label>
+            <div class="col-sm-10">
+                <select class="form-select" id="categoriaProducto" name="categoriaProducto.idCategoria" required>
+                    <option value="" selected disabled>Seleccione la categoría</option>
+                    <option th:each="categoria : ${categorias}"
+                            th:value="${categoria.idCategoria}"
+                            th:text="${categoria.nombreCategoria}"
+                            th:selected="${categoria.idCategoria == producto.categoriaProducto.idCategoria}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="nombreProducto" class="col-sm-2 col-form-label">Nombre Producto</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="nombreProducto" name="nombreProducto"
+                       th:value="*{nombreProducto}" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="descripcionProducto" class="col-sm-2 col-form-label">Descripción</label>
+            <div class="col-sm-10">
+                <textarea class="form-control" id="descripcionProducto" name="descripcionProducto" required
+                          th:text="*{descripcionProducto}"></textarea>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="precioProducto" class="col-sm-2 col-form-label">Precio</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="precioProducto" name="precioProducto" step="0.01"
+                       th:value="*{precioProducto}" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="stockProducto" class="col-sm-2 col-form-label">Stock</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="stockProducto" name="stockProducto"
+                       th:value="*{stockProducto}" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="imagenProducto" class="col-sm-2 col-form-label">Imagen</label>
+            <div class="col-sm-10">
+                <input type="file" class="form-control" id="imagenProducto" name="imagenFile" accept="image/*">
+                <p th:text="*{imagenProducto}"></p>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

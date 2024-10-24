@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Productos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .card-body .btn {
+            width: 100%;
+        }
+        .filter-sidebar {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .btn-quantity {
+            width: 30px;
+            height: 50px;
+            font-size: 14px;
+        }
+        .input-group .form-control {
+            width: 60px;
+            text-align: center;
+        }
+        .input-group .btn {
+            flex: 0 0 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{index :: menu}"></div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center mb-4">Catálogo Productos</h2>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeExito}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeError}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div id="mensajeProductoAgregado" class="alert alert-info alert-dismissible fade show" role="alert"
+         style="display: none;">
+        Producto agregado al carrito
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="filter-sidebar">
+                <h5>Filtrar por</h5>
+
+                <form th:action="@{/catalogo-productos}" method="get">
+                    <div class="mb-3">
+                        <label for="categoriaProducto" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoriaProducto" name="categoriaProducto">
+                            <option value="" selected disabled>Seleccione la categoría</option>
+                            <option th:each="categoria : ${categorias}" th:value="${categoria.idCategoria}"
+                                    th:text="${categoria.nombreCategoria}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombreProducto" class="form-label">Nombre Producto</label>
+                        <input type="text" class="form-control" id="nombreProducto" name="nombreProducto">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="precioMinimo" class="form-label">Precio Mínimo</label>
+                        <input type="number" class="form-control" id="precioMinimo" name="precioMinimo" min="3000"
+                               max="100000" step="100" value="3000">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="precioMaximo" class="form-label">Precio Máximo</label>
+                        <input type="number" class="form-control" id="precioMaximo" name="precioMaximo" min="3000"
+                               max="100000" step="100" value="100000">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between mb-3">
+                <p><strong th:text="${productos.size()}">0</strong> Productos encontrados</p>
+
+                <form th:action="@{/catalogo-productos}" method="get" class="d-flex align-items-center">
+                    <select class="form-select me-2" name="ordenarPor"
+                            onchange="this.form.submit(); updateOrderText(this)">
+                        <option value="mayor">Ordenar por:</option>
+                        <option value="menor">Ordenar por: Precio menor a mayor</option>
+                        <option value="mayor">Ordenar por: Precio mayor a menor</option>
+                    </select>
+                    <input type="hidden" name="categoriaProducto" th:value="${param.categoriaProducto}"/>
+                    <input type="hidden" name="nombreProducto" th:value="${param.nombreProducto}"/>
+                    <input type="hidden" name="precioMinimo" th:value="${param.precioMinimo}"/>
+                    <input type="hidden" name="precioMaximo" th:value="${param.precioMaximo}"/>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" th:each="producto : ${productos}">
+                    <div class="card h-100">
+                        <img th:src="@{'/imagenes/' + ${producto.imagenProducto}}" class="card-img-top product-img"
+                             alt="Imagen Producto">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${producto.nombreProducto}">Nombre Producto</h5>
+                            <p class="card-text" th:text="${producto.descripcionProducto}">Descripción Producto</p>
+                            <p class="text-danger fw-bold"
+                               th:text="${@productoController.formatoPrecio(producto.precioProducto)}">$0</p>
+
+                            <div class="input-group mb-3">
+                                <button class="btn btn-outline-secondary btn-quantity" type="button"
+                                        onclick="decreaseQuantity(this)">-
+                                </button>
+                                <input type="number" class="form-control text-center" value="1" min="1">
+                                <button class="btn btn-outline-secondary btn-quantity" type="button"
+                                        onclick="increaseQuantity(this)">+
+                                </button>
+                            </div>
+
+                            <button type="button" class="btn btn-success"
+                                    th:disabled="${producto.stockProducto == 0}"
+                                    th:data-product-id="${producto.idProducto}">
+                                Añadir al carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function decreaseQuantity(button) {
+        let input = button.nextElementSibling;
+        if (input.value > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+
+    function increaseQuantity(button) {
+        let input = button.previousElementSibling;
+        input.value = parseInt(input.value) + 1;
+    }
+
+    function agregarAlCarrito(productId, cantidad, nombreProducto, precioProducto, descripcionProducto, imagenProducto) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        cart[productId] = {
+            cantidad: (cart[productId]?.cantidad || 0) + cantidad,
+            nombre: nombreProducto,
+            precio: precioProducto,
+            descripcion: descripcionProducto,
+            imagen: imagenProducto
+        };
+        localStorage.setItem('cart', JSON.stringify(cart));
+        actualizarCarrito();
+        const mensajeProductoAgregado = document.getElementById('mensajeProductoAgregado');
+        mensajeProductoAgregado.style.display = 'block';
+        setTimeout(() => {
+            mensajeProductoAgregado.style.display = 'none';
+        }, 2000);
+    }
+
+    document.querySelectorAll('.btn-success').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+            const card = this.closest('.card');
+            const cantidad = card.querySelector('input[type="number"]').value;
+            const nombreProducto = card.querySelector('.card-title').textContent;
+            const precioProducto = card.querySelector('.text-danger').textContent.replace('$', '').replace('.', '');
+            const descripcionProducto = card.querySelector('.card-text').textContent;
+            const imagenProducto = card.querySelector('.card-img-top').src;
+            agregarAlCarrito(productId, parseInt(cantidad), nombreProducto, parseFloat(precioProducto), descripcionProducto, imagenProducto);
+        });
+    });
+
+    function actualizarCarrito() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
+        const cartCountElement = document.getElementById('cart-count');
+        cartCountElement.textContent = totalItems;
+    }
+
+    document.addEventListener('DOMContentLoaded', actualizarCarrito);
+</script>
+
+</body>
+</html>
