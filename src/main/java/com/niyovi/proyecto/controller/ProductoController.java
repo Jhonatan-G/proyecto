@@ -2,6 +2,7 @@ package com.niyovi.proyecto.controller;
 
 import com.niyovi.proyecto.model.*;
 import com.niyovi.proyecto.repository.EstadoRepository;
+import com.niyovi.proyecto.repository.FormaPagoRepository;
 import com.niyovi.proyecto.repository.MetodoEntregaRepository;
 import com.niyovi.proyecto.service.CategoriaService;
 import com.niyovi.proyecto.service.ProductoService;
@@ -42,6 +43,9 @@ public class ProductoController {
 
     @Autowired
     private MetodoEntregaRepository metodoEntregaRepository;
+
+    @Autowired
+    private FormaPagoRepository formaPagoRepository;
 
     @GetMapping("/registrar-producto")
     public String mostrarFormularioNuevoProducto(Model model, Principal principal) {
@@ -303,5 +307,29 @@ public class ProductoController {
             usuarioService.actualizarUsuarioCompra(usuarioOriginal);
         }
         return "redirect:/confirmar-metodo-entrega";
+    }
+
+    @GetMapping("/confirmar-forma-pago")
+    public String mostrarFormasPago(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        Usuario usuario = usuarioService.obtenerUsuarioLogueado();
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+        Rol rolUsuario = usuario.getRolUsuario();
+        model.addAttribute("rolUsuario", rolUsuario.getIdRol());
+        model.addAttribute("usuario", usuario);
+        Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+        List<FormaPago> formaPagos = formaPagoRepository.findByEstadoFormaPago(estadoActivo);
+        model.addAttribute("formaPagos", formaPagos);
+        return "confirmarFormaPago";
+    }
+
+    @PostMapping("/guardar-forma-pago")
+    public String guardarFormaPagoSeleccionado(@RequestParam("formaPagoSeleccionado") Long idFormaPago, Model model){
+        model.addAttribute("mensajeExito", "Forma de pago seleccionado correctamente.");
+        return "redirect:/pago";
     }
 }

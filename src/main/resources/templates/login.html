@@ -60,6 +60,34 @@
     </form>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        actualizarCarrito();
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalProductos = 0;
+        let subtotal = 0;
+        Object.keys(cart).forEach(productId => {
+            let { cantidad, precio } = cart[productId];
+            subtotal += precio * cantidad;
+            totalProductos += cantidad;
+        });
+        document.getElementById('total-productos').innerText = totalProductos;
+        document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+        document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+    });
+
+    function actualizarCarrito() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
+        const cartCountElement = document.getElementById('cart-count');
+        cartCountElement.textContent = totalItems;
+    }
+
+    function formatoPrecio(precio) {
+        return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
