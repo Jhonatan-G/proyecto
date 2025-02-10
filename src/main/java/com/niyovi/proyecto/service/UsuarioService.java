@@ -194,4 +194,9 @@ public class UsuarioService implements UserDetailsService {
     public void actualizarUsuarioCompra(Usuario usuario) {
         usuarioRepository.save(usuario);
     }
+
+    public String obtenerCorreoAdministrador() {
+        Usuario administrador = usuarioRepository.findByRolUsuarioIdRol(1L);
+        return (administrador != null) ? administrador.getCorreoUsuario() : null;
+    }
 }

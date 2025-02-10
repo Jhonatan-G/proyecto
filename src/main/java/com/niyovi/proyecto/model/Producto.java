@@ -34,6 +34,9 @@ public class Producto {
     @JoinColumn(name = "fk_estado_producto")
     private Estado estadoProducto;
 
+    @Transient
+    private Integer cantidadCarrito;
+
     public Producto() {
     }
 
@@ -99,5 +102,13 @@ public class Producto {
 
     public void setEstadoProducto(Estado estadoProducto) {
         this.estadoProducto = estadoProducto;
+    }
+
+    public Integer getCantidadCarrito() {
+        return cantidadCarrito;
+    }
+
+    public void setCantidadCarrito(Integer cantidadCarrito) {
+        this.cantidadCarrito = cantidadCarrito;
     }
 }

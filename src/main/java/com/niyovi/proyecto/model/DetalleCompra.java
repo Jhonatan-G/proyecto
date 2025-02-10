@@ -19,6 +19,12 @@ public class DetalleCompra {
     @JoinColumn(name = "fk_producto")
     private Producto productoDetalle;
 
+    @Column(name = "precio_detalle")
+    private Double precioDetalle;
+
+    @Column(name = "cantidad_detalle")
+    private Integer cantidadDetalle;
+
     @Column(name = "subtotal_detalle")
     private Double subtotalDetalle;
 
@@ -47,6 +53,22 @@ public class DetalleCompra {
 
     public void setProductoDetalle(Producto productoDetalle) {
         this.productoDetalle = productoDetalle;
+    }
+
+    public Double getPrecioDetalle() {
+        return precioDetalle;
+    }
+
+    public void setPrecioDetalle(Double precioDetalle) {
+        this.precioDetalle = precioDetalle;
+    }
+
+    public Integer getCantidadDetalle() {
+        return cantidadDetalle;
+    }
+
+    public void setCantidadDetalle(Integer cantidadDetalle) {
+        this.cantidadDetalle = cantidadDetalle;
     }
 
     public Double getSubtotalDetalle() {

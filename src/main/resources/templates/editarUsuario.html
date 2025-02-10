@@ -33,6 +33,7 @@
     </div>
 
     <form th:action="@{/editar-usuario}" method="post" th:object="${usuario}">
+
         <input type="hidden" name="idUsuario" th:value="*{idUsuario}">
 
         <div class="row mb-3">

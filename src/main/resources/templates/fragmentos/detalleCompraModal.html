@@ -1,0 +1,25 @@
+<div xmlns:th="http://www.w3.org/1999/xhtml">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Imagen</th>
+            <th>Precio Unitario</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="detalle : ${detalles}">
+            <td th:text="${detalle.productoDetalle.nombreProducto}"></td>
+            <td>
+                <img th:src="@{'/imagenes/' + ${detalle.productoDetalle.imagenProducto}}" alt="Imagen Producto"
+                     style="width: 80px; height: auto;">
+            </td>
+            <td th:text="${#numbers.formatDecimal(detalle.precioDetalle, 0, 'COMMA', 0, 'POINT')}"></td>
+            <td th:text="${detalle.cantidadDetalle}"></td>
+            <td th:text="${#numbers.formatDecimal(detalle.subtotalDetalle, 0, 'COMMA', 0, 'POINT')}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>

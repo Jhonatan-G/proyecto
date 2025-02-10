@@ -50,15 +50,22 @@
                 </li>
 
                 <li class="nav-item" th:if="${rolUsuario == 1 || rolUsuario == 3}">
-                    <a class="nav-link" href="#">Pedidos</a>
+                    <a class="nav-link" href="/pedidos">Pedidos</a>
                 </li>
 
                 <li class="nav-item" th:if="${rolUsuario == 1}">
-                    <a class="nav-link" href="#">Reportes</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="reportesDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Reportes
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="reportesDropdown">
+                        <li><a class="dropdown-item" href="/reporte-ventas">Reporte Ventas</a></li>
+                        <li><a class="dropdown-item" href="/consultar-productos">Reporte Inventario</a></li>
+                    </ul>
                 </li>
 
                 <li class="nav-item" th:if="${rolUsuario == 2}">
-                    <a class="nav-link" href="#">Mis Compras</a>
+                    <a class="nav-link" href="/mis-compras">Mis Compras</a>
                 </li>
 
                 <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()')}">

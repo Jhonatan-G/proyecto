@@ -39,6 +39,9 @@
         <div class="col-md-8">
             <h3>Selecciona un método de entrega</h3>
             <form id="confirmarMetodoEntrega" th:action="@{/guardar-metodo-entrega}" method="post">
+
+                <input type="hidden" id="carritoOculto" name="carritoOculto">
+
                 <div th:each="metodoEntrega : ${metodosEntrega}">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="radio" name="metodoEntregaSeleccionado"
@@ -99,8 +102,15 @@
 
     function finalizarCompra() {
         const form = document.getElementById('confirmarMetodoEntrega');
+        const metodoSeleccionado = document.querySelector('input[name="metodoEntregaSeleccionado"]:checked');
+        if (!metodoSeleccionado) {
+            alert('Por favor selecciona un método de entrega antes de continuar.');
+            return;
+        }
+        const carritoOculto = document.getElementById('carritoOculto');
+        const cart = localStorage.getItem('cart');
+        carritoOculto.value = cart ? cart : '{}';
         form.submit();
-        window.location.href = "/confirmar-forma-pago";
     }
 
     function actualizarCarrito() {

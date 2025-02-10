@@ -2,7 +2,6 @@ package com.niyovi.proyecto.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,9 +20,6 @@ public class Compra {
     @Column(name = "fecha_creacion_compra")
     private LocalDateTime fechaCreacionCompra;
 
-    @Column(name = "hora_creacion_compra")
-    private LocalDate horaCreacionCompra;
-
     @Column(name = "precio_total_compra")
     private Double precioTotalCompra;
 
@@ -41,6 +37,12 @@ public class Compra {
     @ManyToOne
     @JoinColumn(name = "fk_estado_compra")
     private Estado estadoCompra;
+
+    @Column(name = "observacion_compra")
+    private String observacionCompra;
+
+    @Column(name = "reseña_compra")
+    private String reseñaCompra;
 
     public Compra() {
     }
@@ -67,14 +69,6 @@ public class Compra {
 
     public void setFechaCreacionCompra(LocalDateTime fechaCreacionCompra) {
         this.fechaCreacionCompra = fechaCreacionCompra;
-    }
-
-    public LocalDate getHoraCreacionCompra() {
-        return horaCreacionCompra;
-    }
-
-    public void setHoraCreacionCompra(LocalDate horaCreacionCompra) {
-        this.horaCreacionCompra = horaCreacionCompra;
     }
 
     public Double getPrecioTotalCompra() {
@@ -115,5 +109,21 @@ public class Compra {
 
     public void setEstadoCompra(Estado estadoCompra) {
         this.estadoCompra = estadoCompra;
+    }
+
+    public String getObservacionCompra() {
+        return observacionCompra;
+    }
+
+    public void setObservacionCompra(String observacionCompra) {
+        this.observacionCompra = observacionCompra;
+    }
+
+    public String getReseñaCompra() {
+        return reseñaCompra;
+    }
+
+    public void setReseñaCompra(String reseñaCompra) {
+        this.reseñaCompra = reseñaCompra;
     }
 }

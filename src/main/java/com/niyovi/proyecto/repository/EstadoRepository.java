@@ -8,4 +8,6 @@ import java.util.List;
 public interface EstadoRepository extends JpaRepository<Estado, Long> {
 
     List<Estado> findByNombreEstado(String nombreEstado);
+
+    List<Estado> findByIdEstadoIn(List<Long> ids);
 }

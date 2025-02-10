@@ -25,6 +25,7 @@
     </div>
 
     <form th:action="@{/editar-producto}" method="post" th:object="${producto}" enctype="multipart/form-data">
+
         <input type="hidden" name="idProducto" th:value="*{idProducto}">
 
         <div class="row mb-3">

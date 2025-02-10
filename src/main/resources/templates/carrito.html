@@ -125,6 +125,10 @@
 
     function mostrarCarrito() {
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        if (!cart || typeof cart !== 'object') {
+            console.error('Error: El carrito no tiene el formato correcto.');
+            return;
+        }
         let carritoContainer = document.getElementById('carrito-items');
         carritoContainer.innerHTML = '';
         let totalProductos = 0;
@@ -193,6 +197,10 @@
 
     function formatoPrecio(precio) {
         return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function obtenerCarritoJSON() {
+        return JSON.stringify(localStorage.getItem('cart'));
     }
 </script>
 

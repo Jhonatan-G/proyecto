@@ -39,7 +39,10 @@
         <div class="col-md-8">
             <h3>Información del Usuario</h3>
             <form id="confirmarDatosForm" th:action="@{/actualizar-datos}" method="post" th:object="${usuario}">
+
                 <input type="hidden" name="idUsuario" th:value="*{idUsuario}">
+
+                <input type="hidden" id="carritoOculto" name="carritoOculto">
 
                 <div class="row mb-3">
                     <label for="nombresUsuario" class="col-sm-2 col-form-label">Nombres</label>
@@ -128,6 +131,7 @@
         document.getElementById('total-productos').innerText = totalProductos;
         document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
         document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+        document.getElementById('carritoOculto').value = JSON.stringify(cart);
     });
 
     function finalizarCompra() {

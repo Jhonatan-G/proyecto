@@ -33,6 +33,7 @@
     </div>
 
     <form th:action="@{/login}" method="post">
+
         <input type="hidden" name="from" th:if="${param.from != null}" th:value="${param.from}">
 
         <div class="row mb-3">

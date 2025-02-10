@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Pedido</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<div th:replace="~{index :: menu}"></div>
+
+<div class="container mt-5">
+    <h2 class="text-center">Editar Pedido</h2>
+
+    <form th:action="@{/editar-pedido}" method="post" th:object="${pedido}">
+
+        <input type="hidden" name="idCompra" th:value="*{idCompra}">
+
+        <div class="mb-3">
+            <label for="estadoCompra" class="form-label">Estado</label>
+            <select id="estadoCompra" name="estadoCompra.idEstado" class="form-select" required>
+                <option value="" disabled>Seleccione el estado</option>
+                <option th:each="estado : ${estados}" th:value="${estado.idEstado}"
+                        th:text="${estado.nombreEstado}"
+                        th:selected="${estado.idEstado == pedido.estadoCompra.idEstado}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="observacionCompra" class="form-label">Observación</label>
+            <textarea id="observacionCompra" name="observacionCompra" class="form-control"
+                      th:text="*{observacionCompra}"></textarea>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

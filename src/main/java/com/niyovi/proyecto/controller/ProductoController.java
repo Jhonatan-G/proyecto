@@ -1,15 +1,10 @@
 package com.niyovi.proyecto.controller;
 
 import com.niyovi.proyecto.model.*;
-import com.niyovi.proyecto.repository.EstadoRepository;
-import com.niyovi.proyecto.repository.FormaPagoRepository;
-import com.niyovi.proyecto.repository.MetodoEntregaRepository;
-import com.niyovi.proyecto.service.CategoriaService;
-import com.niyovi.proyecto.service.ProductoService;
-import com.niyovi.proyecto.service.UsuarioService;
+import com.niyovi.proyecto.repository.*;
+import com.niyovi.proyecto.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -42,10 +37,7 @@ public class ProductoController {
     private EstadoRepository estadoRepository;
 
     @Autowired
-    private MetodoEntregaRepository metodoEntregaRepository;
-
-    @Autowired
-    private FormaPagoRepository formaPagoRepository;
+    private ProductoRepository productoRepository;
 
     @GetMapping("/registrar-producto")
     public String mostrarFormularioNuevoProducto(Model model, Principal principal) {
@@ -236,100 +228,5 @@ public class ProductoController {
         }
         model.addAttribute("productosCarrito", productosCarrito);
         return "carrito";
-    }
-
-    @PostMapping("/carrito")
-    @ResponseBody
-    public ResponseEntity<?> recibirCarrito(@RequestBody List<Long> productIds) {
-        List<Producto> productosCarrito = productIds.stream()
-                .map(idProducto -> productoService.obtenerProductoPorId(idProducto))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(Collections.singletonMap("productos", productosCarrito));
-    }
-
-    @GetMapping("/finalizar-compra")
-    public String finalizarCompra(Model model, Principal principal) {
-        if (principal != null) {
-            return "redirect:/confirmarDatosCompra";
-        } else {
-            return "redirect:/login?from=finalizarCompra";
-        }
-    }
-
-    @GetMapping("/confirmar-datos-compra")
-    public String mostrarConfirmarDatosCompra(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        Usuario usuario = usuarioService.obtenerUsuarioLogueado();
-        if (usuario == null) {
-            return "redirect:/login";
-        }
-        Rol rolUsuario = usuario.getRolUsuario();
-        model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        model.addAttribute("usuario", usuario);
-        return "confirmarDatosCompra";
-    }
-
-    @GetMapping("/confirmar-metodo-entrega")
-    public String mostrarMetodosEntrega(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        Usuario usuario = usuarioService.obtenerUsuarioLogueado();
-        if (usuario == null) {
-            return "redirect:/login";
-        }
-        Rol rolUsuario = usuario.getRolUsuario();
-        model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        model.addAttribute("usuario", usuario);
-        Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
-        List<MetodoEntrega> metodosEntrega = metodoEntregaRepository.findByEstadoMetodoEntrega(estadoActivo);
-        model.addAttribute("metodosEntrega", metodosEntrega);
-        return "confirmarMetodoEntrega";
-    }
-
-    @PostMapping("/guardar-metodo-entrega")
-    public String guardarMetodoEntregaSeleccionado(@RequestParam("metodoEntregaSeleccionado") Long idMetodoEntrega, Model model) {
-        model.addAttribute("mensajeExito", "Método de entrega seleccionado correctamente.");
-        return "redirect:/pago";
-    }
-
-    @PostMapping("/actualizar-datos")
-    public String actualizarDatos(@ModelAttribute("usuario") Usuario usuarioForm, RedirectAttributes redirectAttributes) {
-        Usuario usuarioOriginal = usuarioService.buscarPorId(usuarioForm.getIdUsuario());
-        if (usuarioOriginal != null) {
-            usuarioOriginal.setNombresUsuario(usuarioForm.getNombresUsuario());
-            usuarioOriginal.setApellidosUsuario(usuarioForm.getApellidosUsuario());
-            usuarioOriginal.setCelularUsuario(usuarioForm.getCelularUsuario());
-            usuarioOriginal.setDireccionUsuario(usuarioForm.getDireccionUsuario());
-            usuarioOriginal.setCorreoUsuario(usuarioForm.getCorreoUsuario());
-            usuarioService.actualizarUsuarioCompra(usuarioOriginal);
-        }
-        return "redirect:/confirmar-metodo-entrega";
-    }
-
-    @GetMapping("/confirmar-forma-pago")
-    public String mostrarFormasPago(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        Usuario usuario = usuarioService.obtenerUsuarioLogueado();
-        if (usuario == null) {
-            return "redirect:/login";
-        }
-        Rol rolUsuario = usuario.getRolUsuario();
-        model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        model.addAttribute("usuario", usuario);
-        Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
-        List<FormaPago> formaPagos = formaPagoRepository.findByEstadoFormaPago(estadoActivo);
-        model.addAttribute("formaPagos", formaPagos);
-        return "confirmarFormaPago";
-    }
-
-    @PostMapping("/guardar-forma-pago")
-    public String guardarFormaPagoSeleccionado(@RequestParam("formaPagoSeleccionado") Long idFormaPago, Model model){
-        model.addAttribute("mensajeExito", "Forma de pago seleccionado correctamente.");
-        return "redirect:/pago";
     }
 }

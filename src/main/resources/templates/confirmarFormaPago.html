@@ -38,7 +38,13 @@
     <div class="row">
         <div class="col-md-8">
             <h3>Selecciona una forma de pago</h3>
-            <form th:action="@{/guardar-forma-pago}" method="post">
+            <form th:action="@{/guardar-compra}" method="post" enctype="multipart/form-data">
+
+                <input type="hidden" id="carritoOculto" name="carritoOculto">
+
+                <input type="hidden" id="metodoEntregaSeleccionado" name="metodoEntregaSeleccionado"
+                       th:value="${session.metodoEntregaSeleccionado.idMetodoEntrega}">
+
                 <div th:each="formaPago : ${formaPagos}">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="radio" name="formaPagoSeleccionado"
@@ -65,7 +71,8 @@
                 <p>Productos: <span id="total-productos">0</span></p>
                 <p>Subtotal: <span id="subtotal">$0</span></p>
                 <p class="summary-total">Total: <span id="total">$0</span></p>
-                <button class="btn btn-primary w-100" id="finalizar-compra" onclick="finalizarCompra()">Confirmar Forma Pago
+                <button class="btn btn-primary w-100" id="finalizar-compra" onclick="finalizarCompra()">Confirmar Forma
+                    Pago
                 </button>
                 <p class="me-3 mt-3 mb-2">Realiza tu pago seguro fácilmente con:</p>
                 <div class="d-flex align-items-center">
@@ -88,6 +95,28 @@
 </div>
 
 <script>
+    function finalizarCompra() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || {};
+        const productos = Object.keys(cart).map(productId => ({
+            idProducto: parseInt(productId, 10),
+            cantidadCarrito: cart[productId].cantidad
+        }));
+        const formaPagoSeleccionado = document.querySelector('input[name="formaPagoSeleccionado"]:checked');
+        const metodoEntregaSeleccionado = document.querySelector('input[name="metodoEntregaSeleccionado"]').value;
+        if (!formaPagoSeleccionado) {
+            alert('Por favor selecciona una forma de pago.');
+            return;
+        }
+        const carritoInput = document.getElementById('carritoOculto');
+        carritoInput.value = JSON.stringify(productos);
+        if (productos.length === 0) {
+            alert('El carrito está vacío.');
+            return;
+        }
+        const form = document.querySelector('form');
+        form.submit();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         actualizarCarrito();
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
