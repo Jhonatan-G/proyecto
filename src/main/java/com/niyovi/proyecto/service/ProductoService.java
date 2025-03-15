@@ -55,7 +55,14 @@ public class ProductoService {
     }
 
     public void actualizarProducto(Producto producto) {
-        productoRepository.save(producto);
+        Producto productoExistente = productoRepository.findById(producto.getIdProducto())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        productoExistente.setNombreProducto(producto.getNombreProducto());
+        productoExistente.setDescripcionProducto(producto.getDescripcionProducto());
+        productoExistente.setPrecioProducto(producto.getPrecioProducto());
+        productoExistente.setCategoriaProducto(producto.getCategoriaProducto());
+        productoExistente.setImagenProducto(producto.getImagenProducto());
+        productoRepository.save(productoExistente);
     }
 
     public Producto obtenerProductoPorId(Long id) {

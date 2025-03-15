@@ -114,26 +114,29 @@
             <div class="row g-4">
                 <div class="col-md-4" th:each="producto : ${productos}">
                     <div class="card h-100">
-                        <img th:src="@{'/imagenes/' + ${producto.imagenProducto}}" class="card-img-top product-img"
-                             alt="Imagen Producto">
+                        <img th:src="@{'https://proyecto-grado-niyovi.s3.us-east-2.amazonaws.com/' + ${producto.imagenProducto}}"
+                             class="card-img-top product-img" alt="Imagen Producto">
                         <div class="card-body">
                             <h5 class="card-title" th:text="${producto.nombreProducto}">Nombre Producto</h5>
                             <p class="card-text" th:text="${producto.descripcionProducto}">Descripción Producto</p>
                             <p class="text-danger fw-bold"
                                th:text="${@productoController.formatoPrecio(producto.precioProducto)}">$0</p>
 
-                            <div class="input-group mb-3">
+                            <p class="text-danger fw-bold" th:if="${producto.stockProducto == 0}">Sin stock
+                                disponible</p>
+
+                            <div class="input-group mb-3" th:if="${producto.stockProducto > 0}">
                                 <button class="btn btn-outline-secondary btn-quantity" type="button"
                                         onclick="decreaseQuantity(this)">-
                                 </button>
-                                <input type="number" class="form-control text-center" value="1" min="1">
+                                <input type="number" class="form-control text-center" value="1" min="1"
+                                       th:max="${producto.stockProducto}">
                                 <button class="btn btn-outline-secondary btn-quantity" type="button"
                                         onclick="increaseQuantity(this)">+
                                 </button>
                             </div>
 
-                            <button type="button" class="btn btn-success"
-                                    th:disabled="${producto.stockProducto == 0}"
+                            <button type="button" class="btn btn-success" th:disabled="${producto.stockProducto == 0}"
                                     th:data-product-id="${producto.idProducto}">
                                 Añadir al carrito
                             </button>

@@ -1,21 +1,25 @@
 package com.niyovi.proyecto.controller;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.niyovi.proyecto.model.*;
 import com.niyovi.proyecto.repository.*;
 import com.niyovi.proyecto.service.*;
 import jakarta.servlet.http.HttpSession;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.text.NumberFormat;
 import java.util.*;
@@ -39,6 +43,18 @@ public class ProductoController {
     @Autowired
     private ProductoRepository productoRepository;
 
+    @Value("${aws.access.key}")
+    private String accessKey;
+
+    @Value("${aws.secret.key}")
+    private String secretKey;
+
+    @Value("${aws.region}")
+    private String region;
+
+    @Value("${aws.s3.bucket}")
+    private String bucketName;
+
     @GetMapping("/registrar-producto")
     public String mostrarFormularioNuevoProducto(Model model, Principal principal) {
         Usuario usuariom = usuarioService.buscarPorUsuario(principal.getName());
@@ -54,29 +70,38 @@ public class ProductoController {
     @PostMapping("/registrar-producto")
     public String guardarProducto(@ModelAttribute("producto") Producto producto,
                                   @RequestParam("imagenFile") MultipartFile imagenFile,
+                                  RedirectAttributes redirectAttributes,
                                   Model model, Principal principal) {
         try {
-            String rutaImagen = "C:/Users/Jhona/OneDrive/Imagenes Proyecto/";
-            Path directorioPath = Paths.get(rutaImagen);
-            if (!Files.exists(directorioPath)) {
-                Files.createDirectories(directorioPath);
+            if (producto.getStockProducto() == null) {
+                producto.setStockProducto(0);
             }
             if (!imagenFile.isEmpty()) {
-                String nombreArchivo = imagenFile.getOriginalFilename();
-                Path rutaCompleta = Paths.get(rutaImagen + nombreArchivo);
-                Files.copy(imagenFile.getInputStream(), rutaCompleta, StandardCopyOption.REPLACE_EXISTING);
+                File archivoTemporal = File.createTempFile("producto", ".jpg");
+                Thumbnails.of(imagenFile.getInputStream())
+                        .size(800, 800)
+                        .outputFormat("jpg")
+                        .toFile(archivoTemporal);
+                AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                        .withRegion(region)
+                        .withCredentials(new AWSStaticCredentialsProvider(
+                                new BasicAWSCredentials(accessKey, secretKey)))
+                        .build();
+                String nombreArchivo = "Productos/" + UUID.randomUUID() + ".jpg";
+                s3Client.putObject(new PutObjectRequest(bucketName, nombreArchivo, archivoTemporal));
                 producto.setImagenProducto(nombreArchivo);
             }
-            Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+            Estado estadoActivo = estadoRepository.findById(1L)
+                    .orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             producto.setEstadoProducto(estadoActivo);
             productoService.guardarProducto(producto);
-            model.addAttribute("mensajeExito", "Producto guardado correctamente.");
+            redirectAttributes.addFlashAttribute("mensajeExito", "Producto guardado correctamente.");
             Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
             Rol rolUsuario = usuario.getRolUsuario();
             model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-            return "index";
+            return "redirect:/consultar-productos";
         } catch (IOException e) {
-            model.addAttribute("mensajeError", "Error al guardar la imagen: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar la imagen: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<Categoria> categorias = categoriaService.obtenerCategoriasActivas(estadoActivo);
             Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
@@ -84,7 +109,7 @@ public class ProductoController {
             model.addAttribute("rolUsuario", rolUsuario.getIdRol());
             return "registroProducto";
         } catch (Exception e) {
-            model.addAttribute("mensajeError", "Error al guardar el producto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar el producto: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<Categoria> categorias = categoriaService.obtenerCategoriasActivas(estadoActivo);
             Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
@@ -130,30 +155,37 @@ public class ProductoController {
                                   @RequestParam("imagenFile") MultipartFile imagenFile,
                                   Model model, Principal principal) {
         try {
-            String rutaImagen = "C:/Users/Jhona/OneDrive/Imagenes Proyecto/";
-            Path directorioPath = Paths.get(rutaImagen);
-            if (!Files.exists(directorioPath)) {
-                Files.createDirectories(directorioPath);
-            }
+            Producto productoExistente = productoService.obtenerProductoPorId(producto.getIdProducto());
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withRegion(region)
+                    .withCredentials(new AWSStaticCredentialsProvider(
+                            new BasicAWSCredentials(accessKey, secretKey)))
+                    .build();
             if (!imagenFile.isEmpty()) {
-                String nombreArchivo = imagenFile.getOriginalFilename();
-                Path rutaCompleta = Paths.get(rutaImagen + nombreArchivo);
-                Files.copy(imagenFile.getInputStream(), rutaCompleta, StandardCopyOption.REPLACE_EXISTING);
-                producto.setImagenProducto(nombreArchivo);
-            } else {
-                Producto productoExistente = productoService.obtenerProductoPorId(producto.getIdProducto());
-                producto.setImagenProducto(productoExistente.getImagenProducto());
+                File archivoTemporal = File.createTempFile("producto", ".jpg");
+                Thumbnails.of(imagenFile.getInputStream())
+                        .size(800, 800)
+                        .outputFormat("jpg")
+                        .toFile(archivoTemporal);
+                String nombreArchivo = "Productos/" + UUID.randomUUID() + ".jpg";
+                s3Client.putObject(new PutObjectRequest(bucketName, nombreArchivo, archivoTemporal));
+                if (productoExistente.getImagenProducto() != null) {
+                    s3Client.deleteObject(bucketName, productoExistente.getImagenProducto());
+                }
+                productoExistente.setImagenProducto(nombreArchivo);
             }
-            Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
-            producto.setEstadoProducto(estadoActivo);
-            productoService.actualizarProducto(producto);
+            productoExistente.setNombreProducto(producto.getNombreProducto());
+            productoExistente.setDescripcionProducto(producto.getDescripcionProducto());
+            productoExistente.setPrecioProducto(producto.getPrecioProducto());
+            productoExistente.setCategoriaProducto(producto.getCategoriaProducto());
+            productoService.actualizarProducto(productoExistente);
             redirectAttributes.addFlashAttribute("mensajeExito", "Producto actualizado correctamente.");
             return "redirect:/consultar-productos";
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al actualizar la imagen: " + e.getMessage());
+            return "redirect:/editar-producto/" + producto.getIdProducto();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al actualizar el producto: " + e.getMessage());
-            Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
-            Rol rolUsuario = usuario.getRolUsuario();
-            model.addAttribute("rolUsuario", rolUsuario.getIdRol());
             return "redirect:/editar-producto/" + producto.getIdProducto();
         }
     }

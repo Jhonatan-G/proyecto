@@ -88,12 +88,16 @@
             <td th:text="${producto.precioProducto}"></td>
             <td th:text="${producto.stockProducto}"></td>
             <td>
-                <img th:src="@{'/imagenes/' + ${producto.imagenProducto}}" alt="Imagen Producto"
-                     class="product-img">
+                <img th:src="@{'https://proyecto-grado-niyovi.s3.us-east-2.amazonaws.com/' + ${producto.imagenProducto}}"
+                     alt="Imagen Producto" class="product-img">
             </td>
             <td>
                 <a th:href="@{/editar-producto/{id}(id=${producto.idProducto})}" class="btn btn-warning btn-sm">
                     <i class="fas fa-edit"></i> Editar
+                </a>
+                <a th:href="@{/inventario/agregar/{idProducto}(idProducto=${producto.idProducto})}"
+                   class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> Agregar Stock
                 </a>
                 <a th:href="@{/eliminar-producto/{id}(id=${producto.idProducto})}" class="btn btn-danger btn-sm"
                    onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?');">

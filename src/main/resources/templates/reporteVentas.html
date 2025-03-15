@@ -4,16 +4,38 @@
     <meta charset="UTF-8">
     <title>Reporte de Ventas</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table th {
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            width: 100% !important;
+            max-width: 400px;
+            height: 400px !important;
+            margin: auto;
+        }
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{index :: menu}"></div>
 
 <div class="container mt-5">
-
     <h2 class="text-center">Reporte de Ventas</h2>
 
-    <form th:action="@{/reporte-ventas/generar}" method="get" class="row g-3">
+    <form th:action="@{/reporte-ventas/generar}" method="get" class="row g-3 mb-4">
         <div class="col-md-4">
             <label for="fechaInicio" class="form-label">Fecha Inicio</label>
             <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
@@ -22,17 +44,223 @@
             <label for="fechaFin" class="form-label">Fecha Fin</label>
             <input type="date" class="form-control" id="fechaFin" name="fechaFin">
         </div>
-        <div class="col-md-4 align-self-end">
+        <div class="col-md-4 d-flex align-items-end">
             <button type="submit" class="btn btn-primary">Generar Reporte</button>
+        </div>
+
+        <div class="text-center mt-4">
+            <a id="btnExcel" href="/reporte-ventas/exportar-excel" class="btn btn-success disabled">
+                Descargar Excel
+            </a>
+            <a id="btnPDF" href="/reporte-ventas/exportar-pdf" class="btn btn-danger disabled">
+                Descargar PDF
+            </a>
         </div>
     </form>
 
-    <div class="mt-4">
-        <h4>Resultados del Reporte</h4>
-        <p>Total de Ventas: <strong th:text="${totalVentas}"></strong></p>
-        <p>Ingresos Totales: <strong th:text="${ingresosTotales}"></strong></p>
+    <div class="row">
+        <div th:if="${ventasPorMes == null or #maps.isEmpty(ventasPorMes)}">
+            <p class="text-muted">No hay datos disponibles. Genera un reporte.</p>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h4>Total de Ventas: <strong th:text="${totalVentas}"></strong></h4>
+                <h4>Ingresos Totales: <strong th:text="${#numbers.formatInteger(ingresosTotales, 0, 'COMMA')}"></strong>
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6" th:if="${ventasPorMes != null and not #maps.isEmpty(ventasPorMes)}">
+            <h5>Ventas por Mes</h5>
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                <tr>
+                    <th>Mes</th>
+                    <th>Ventas</th>
+                    <th>Ingresos Totales</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${ventasPorMes}">
+                    <td th:text="${entry.key}"></td>
+                    <td th:text="${entry.value}"></td>
+                    <td th:text="${#numbers.formatInteger(ingresosPorMes[entry.key], 0, 'COMMA')}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="chart-container">
+                <canvas id="ventasMesChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="ingresosMesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Productos Más Vendidos</h5>
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad Vendida</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${productosMasVendidos}">
+                    <td th:text="${entry.key}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="chart-container">
+                <canvas id="productosChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Clientes Frecuentes</h5>
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Celular</th>
+                    <th>Compras Realizadas</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${clientesFrecuentes}">
+                    <td th:text="${entry.key?.nombre}"></td>
+                    <td th:text="${entry.key.apellido}"></td>
+                    <td th:text="${entry.key.celular}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="chart-container">
+                <canvas id="clientesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Métodos de Pago Usados</h5>
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                <tr>
+                    <th>Método de Pago</th>
+                    <th>Cantidad de Compras</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${metodosPago}">
+                    <td th:text="${entry.key}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="chart-container">
+                <canvas id="metodosPagoChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        function crearGrafica(id, tipo, etiquetas, data, color, label) {
+            if (document.getElementById(id) && etiquetas.length > 0) {
+                new Chart(document.getElementById(id), {
+                    type: tipo,
+                    data: {
+                        labels: etiquetas,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: color,
+                            borderColor: 'black',
+                            borderWidth: 1
+                        }]
+                    }
+                });
+            }
+        }
+
+        function convertirMeses(labels) {
+            const meses = {
+                "1": "Enero", "2": "Febrero", "3": "Marzo", "4": "Abril",
+                "5": "Mayo", "6": "Junio", "7": "Julio", "8": "Agosto",
+                "9": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+            };
+            return labels.map(num => meses[num] || num);
+        }
+
+        let ventasPorMes = /*[[${ventasPorMes}]]*/ {};
+        let ingresosPorMes = /*[[${ingresosPorMes}]]*/ {};
+        let productosMasVendidos = /*[[${productosMasVendidos}]]*/ {};
+        let clientesFrecuentesMap = /*[[${clientesFrecuentesMap}]]*/ {};
+        let metodosPago = /*[[${metodosPago}]]*/ {};
+
+        console.log("Ventas por Mes: ", ventasPorMes);
+        console.log("Ingresos por Mes: ", ingresosPorMes);
+        console.log("Productos Más Vendidos: ", productosMasVendidos);
+        console.log("Clientes Frecuentes: ", clientesFrecuentesMap);
+        console.log("Métodos de Pago: ", metodosPago);
+
+        if (Object.keys(ventasPorMes).length > 0) {
+            let etiquetasMeses = convertirMeses(Object.keys(ventasPorMes));
+            let valoresVentas = Object.values(ventasPorMes);
+            console.log("Etiquetas Meses: ", etiquetasMeses);
+            crearGrafica("ventasMesChart", "bar", etiquetasMeses, valoresVentas, 'blue', "Ventas");
+        }
+
+        if (Object.keys(ingresosPorMes).length > 0) {
+            let etiquetasMeses = convertirMeses(Object.keys(ingresosPorMes));
+            let valoresIngresos = Object.values(ingresosPorMes);
+            crearGrafica("ingresosMesChart", "line", etiquetasMeses, valoresIngresos, 'green', "Ingresos");
+        }
+
+        if (Object.keys(productosMasVendidos).length > 0) {
+            let etiquetasProductos = Object.keys(productosMasVendidos);
+            let valoresProductos = Object.values(productosMasVendidos);
+            crearGrafica("productosChart", "pie", etiquetasProductos, valoresProductos, ['red', 'green', 'blue', 'yellow', 'orange'], "Productos Vendidos");
+        }
+
+        if (Object.keys(clientesFrecuentesMap).length > 0) {
+            let nombresClientes = Object.keys(clientesFrecuentesMap);
+            let comprasClientes = Object.values(clientesFrecuentesMap);
+
+            crearGrafica("clientesChart", "bar", nombresClientes, comprasClientes, 'orange', "Compras");
+        }
+
+        if (Object.keys(metodosPago).length > 0) {
+            let etiquetasMetodos = Object.keys(metodosPago);
+            let valoresMetodos = Object.values(metodosPago);
+            crearGrafica("metodosPagoChart", "doughnut", etiquetasMetodos, valoresMetodos, ['purple', 'cyan', 'magenta', 'gray'], "Métodos de Pago");
+        }
+
+        function habilitarBotones() {
+            let ventasPorMes = /*[[${ventasPorMes}]]*/ {};
+            let productosMasVendidos = /*[[${productosMasVendidos}]]*/ {};
+            let clientesFrecuentes = /*[[${clientesFrecuentes}]]*/ {};
+            let metodosPago = /*[[${metodosPago}]]*/ {};
+
+            if (Object.keys(ventasPorMes).length > 0 ||
+                Object.keys(productosMasVendidos).length > 0 ||
+                Object.keys(clientesFrecuentes).length > 0 ||
+                Object.keys(metodosPago).length > 0) {
+                document.getElementById("btnExcel").classList.remove("disabled");
+                document.getElementById("btnPDF").classList.remove("disabled");
+            }
+        }
+
+        habilitarBotones();
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

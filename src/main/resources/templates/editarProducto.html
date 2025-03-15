@@ -66,18 +66,13 @@
         </div>
 
         <div class="row mb-3">
-            <label for="stockProducto" class="col-sm-2 col-form-label">Stock</label>
-            <div class="col-sm-10">
-                <input type="number" class="form-control" id="stockProducto" name="stockProducto"
-                       th:value="*{stockProducto}" required>
-            </div>
-        </div>
-
-        <div class="row mb-3">
             <label for="imagenProducto" class="col-sm-2 col-form-label">Imagen</label>
             <div class="col-sm-10">
                 <input type="file" class="form-control" id="imagenProducto" name="imagenFile" accept="image/*">
-                <p th:text="*{imagenProducto}"></p>
+                <br>
+                <img th:if="${producto.imagenProducto}"
+                     th:src="'https://s3.us-east-2.amazonaws.com/proyecto-grado-niyovi/' + ${producto.imagenProducto}"
+                     alt="Imagen del producto" style="max-width: 200px; border-radius: 10px;">
             </div>
         </div>
 

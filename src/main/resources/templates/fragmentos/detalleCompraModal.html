@@ -13,7 +13,8 @@
         <tr th:each="detalle : ${detalles}">
             <td th:text="${detalle.productoDetalle.nombreProducto}"></td>
             <td>
-                <img th:src="@{'/imagenes/' + ${detalle.productoDetalle.imagenProducto}}" alt="Imagen Producto"
+                <img th:src="@{'https://proyecto-grado-niyovi.s3.us-east-2.amazonaws.com/' + ${detalle.productoDetalle.imagenProducto}}"
+                     alt="Imagen Producto"
                      style="width: 80px; height: auto;">
             </td>
             <td th:text="${#numbers.formatDecimal(detalle.precioDetalle, 0, 'COMMA', 0, 'POINT')}"></td>
