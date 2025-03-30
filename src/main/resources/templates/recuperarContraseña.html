@@ -6,54 +6,66 @@
     <title>Recuperar Contraseña</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center min-vh-100">
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
-
-    <h2 class="text-center">Recuperar Contraseña</h2>
-
-    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeExito}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeError}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="bg-F3EBE1 mt-3">
+    <div class="container d-flex justify-content-center align-items-center w-100 p-3">
+        <img src="/Lock.png" alt="Login" style="height: 150px; margin-right: 15px;"/>
+        <h2 class="text-center text-brown">Recuperar contraseña</h2>
     </div>
 
-    <form action="#" th:action="@{/recuperar-contraseña}" method="post">
-        <div class="row mb-3">
-            <label for="tipoDocUsuario" class="col-sm-2 col-form-label">Tipo de Documento</label>
-            <div class="col-sm-10">
-                <select class="form-select" id="tipoDocUsuario" name="tipoDocUsuario.idTipoDoc" required>
-                    <option value="" selected disabled>Seleccione el tipo de documento</option>
-                    <option th:each="tipoDoc : ${tiposDocumento}" th:value="${tipoDoc.idTipoDoc}"
-                            th:text="${tipoDoc.nombreTipoDoc}"></option>
-                </select>
-            </div>
+    <div class="container mt-2">
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeExito}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeError}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <div class="row mb-3">
-            <label for="numeroDocUsuario" class="col-sm-2 col-form-label">Número de Documento</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="numeroDocUsuario" name="numeroDocUsuario" required>
+        <form action="#" th:action="@{/recuperar-contraseña}" method="post">
+            <div class="row justify-content-center mb-3">
+                <div class="col-sm-10">
+                    <select class="form-select" id="tipoDocUsuario" name="tipoDocUsuario.idTipoDoc" required>
+                        <option value="" selected disabled>Tipo de documento</option>
+                        <option th:each="tipoDoc : ${tiposDocumento}" th:value="${tipoDoc.idTipoDoc}"
+                                th:text="${tipoDoc.nombreTipoDoc}"></option>
+                    </select>
+                </div>
             </div>
-        </div>
 
-        <div class="row mb-3">
-            <label for="correoUsuario" class="col-sm-2 col-form-label">Correo</label>
-            <div class="col-sm-10">
-                <input type="email" class="form-control" id="correoUsuario" name="correoUsuario" required>
+            <div class="row justify-content-center mb-3">
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="numeroDocUsuario" name="numeroDocUsuario"
+                           placeholder="Número de documento" required>
+                </div>
             </div>
-        </div>
 
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Recuperar contraseña</button>
-        </div>
-    </form>
+            <div class="row justify-content-center mb-3">
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="correoUsuario" name="correoUsuario"
+                           placeholder="Correo electrónico" required>
+                </div>
+            </div>
+
+            <div class="text-center mb-5">
+                <button type="submit" class="btn btn-primary">Recuperar contraseña</button>
+            </div>
+
+            <footer class="bg-dark text-center text-white py-9 mt-10 fixed-bottom img-fluid">
+                <img src="2.png" alt="footer" style="max-width: 100%; height: auto;"/>
+            </footer>
+
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>

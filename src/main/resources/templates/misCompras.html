@@ -50,6 +50,7 @@
         </div>
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Consultar</button>
+            <a href="/mis-compras" class="btn btn-secondary">Limpiar Filtros</a>
         </div>
     </form>
 
@@ -97,12 +98,30 @@
                        th:classappend="${compra.estadoCompra.idEstado != 6} ? 'disabled' : ''"
                        th:attr="aria-disabled=${compra.estadoCompra.idEstado != 6}"
                        aria-label="Descargar factura">
-                        <i class="fas fa-download"></i> Descargar Factura
+                        <i class="fas fa-download"></i> Descargar comprobante de pedido
                     </a>
                 </td>
             </tr>
             </tbody>
         </table>
+        <div class="d-flex justify-content-center mt-3">
+            <nav aria-label="Paginación">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/mis-compras(page=${currentPage - 1})}">Anterior</a>
+                    </li>
+
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/mis-compras(page=${i})}" th:text="${i + 1}"></a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/mis-compras(page=${currentPage + 1})}">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
 

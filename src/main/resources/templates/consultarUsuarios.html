@@ -6,105 +6,126 @@
     <title>Gestión Usuarios</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .table-striped tbody tr:nth-of-type(odd) {
-          background-color: #f9f9f9;
-        }
-        .table th, .table td {
-          text-align: center;
-          vertical-align: middle;
-        }
-        .table th {
-          background-color: #f8f9fa;
-        }
-        .btn-sm {
-          font-size: 0.875rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center min-vh-100">
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
-
-    <h2 class="text-center mb-4">Gestión Usuarios</h2>
-
-    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeExito}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeError}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="bg-F3EBE1 mt-5">
+    <div class="container d-flex flex-colum justify-content-center align-items-center w-100 p-3">
     </div>
 
-    <form th:action="@{/consultar-usuarios}" method="get" class="mb-4">
-        <div class="row mb-3">
+    <h2 class="text-center text-brown mb-4">Gestión Usuarios</h2>
+
+    <div class="container mt-5">
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeExito}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeError}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <form th:action="@{/consultar-usuarios}" method="get" class="mb-3">
             <div class="row mb-3">
-                <label for="tipoDocUsuario" class="col-sm-2 col-form-label">Tipo de Documento</label>
-                <div class="col-sm-10">
-                    <select class="form-select" id="tipoDocUsuario" name="tipoDocUsuario" required>
-                        <option value="" selected disabled>Seleccione el tipo de documento</option>
-                        <option th:each="tipoDoc : ${tiposDocumento}" th:value="${tipoDoc.idTipoDoc}"
-                                th:text="${tipoDoc.nombreTipoDoc}"></option>
-                    </select>
+                <div class="row justify-content-center mb-3">
+                    <div class="col-sm-12 col-md-6">
+                        <select class="form-select" id="tipoDocUsuario" name="tipoDocUsuario" required>
+                            <option value="" selected disabled>Tipo de documento</option>
+                            <option th:each="tipoDoc : ${tiposDocumento}" th:value="${tipoDoc.idTipoDoc}"
+                                    th:text="${tipoDoc.nombreTipoDoc}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mb-2">
+                    <div class="col-sm-12 col-md-6">
+                        <input type="text" class="form-control" id="numeroDocUsuario" name="numeroDocUsuario"
+                               placeholder="Número de Documento" required>
+                    </div>
                 </div>
             </div>
 
-            <div class="row mb-3">
-                <label for="numeroDocUsuario" class="col-sm-2 col-form-label">Número de Documento</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="numeroDocUsuario" name="numeroDocUsuario" required>
-                </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-custom shadow">Consultar</button>
+                <a href="/consultar-usuarios" class="btn btn-custom shadow mb-1">Limpiar Filtros</a>
+            </div>
+        </form>
+
+        <div class="container">
+            <div class="table-responsive">
+                <table class="table table-custom table-striped table-bordered mb-5">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo de Documento</th>
+                        <th>Número de Documento</th>
+                        <th>Nombres</th>
+                        <th>Apellidos</th>
+                        <th>Celular</th>
+                        <th>Dirección</th>
+                        <th>Correo</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="usuario : ${usuariosPage.content}">
+                        <td th:text="${usuario.idUsuario}"></td>
+                        <td th:text="${usuario.tipoDocUsuario.nombreTipoDoc}"></td>
+                        <td th:text="${usuario.numeroDocUsuario}"></td>
+                        <td th:text="${usuario.nombresUsuario}"></td>
+                        <td th:text="${usuario.apellidosUsuario}"></td>
+                        <td th:text="${usuario.celularUsuario}"></td>
+                        <td th:text="${usuario.direccionUsuario}"></td>
+                        <td th:text="${usuario.correoUsuario}"></td>
+                        <td th:text="${usuario.usuarioUsuario}"></td>
+                        <td th:text="${usuario.rolUsuario.nombreRol}"></td>
+                        <td>
+                            <a th:href="@{/editar-usuario/{id}(id=${usuario.idUsuario})}"
+                               class="btn btn-edit btn-sm mb-2">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a th:href="@{/eliminar-usuario/{id}(id=${usuario.idUsuario})}"
+                               class="btn btn-delete btn-sm"
+                               onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+        <footer class="bg-dark text-center text-white py-9 mt-5 fixed-bottom img-fluid">
+            <img src="1.png" alt="footer" style="max-width: 100%; height: auto;"/>
+        </footer>
+    </div>
 
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Consultar</button>
-        </div>
-    </form>
+    <div class="d-flex justify-content-center mb-5">
+        <nav aria-label="Paginación">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/consultar-usuarios(page=${currentPage - 1})}">Anterior</a>
+                </li>
 
-    <table class="table table-striped table-bordered">
-        <thead class="table-light">
-        <tr>
-            <th>ID</th>
-            <th>Tipo de Documento</th>
-            <th>Número de Documento</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Celular</th>
-            <th>Dirección</th>
-            <th>Correo</th>
-            <th>Usuario</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="usuario : ${usuarios}">
-            <td th:text="${usuario.idUsuario}"></td>
-            <td th:text="${usuario.tipoDocUsuario.nombreTipoDoc}"></td>
-            <td th:text="${usuario.numeroDocUsuario}"></td>
-            <td th:text="${usuario.nombresUsuario}"></td>
-            <td th:text="${usuario.apellidosUsuario}"></td>
-            <td th:text="${usuario.celularUsuario}"></td>
-            <td th:text="${usuario.direccionUsuario}"></td>
-            <td th:text="${usuario.correoUsuario}"></td>
-            <td th:text="${usuario.usuarioUsuario}"></td>
-            <td th:text="${usuario.rolUsuario.nombreRol}"></td>
-            <td>
-                <a th:href="@{/editar-usuario/{id}(id=${usuario.idUsuario})}" class="btn btn-warning btn-sm">
-                    <i class="fas fa-edit"></i> Editar
-                </a>
-                <a th:href="@{/eliminar-usuario/{id}(id=${usuario.idUsuario})}" class="btn btn-danger btn-sm"
-                   onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">
-                    <i class="fas fa-trash"></i> Eliminar
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/consultar-usuarios(page=${i})}" th:text="${i + 1}"></a>
+                </li>
+
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/consultar-usuarios(page=${currentPage + 1})}">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>

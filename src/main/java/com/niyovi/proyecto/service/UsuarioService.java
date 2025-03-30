@@ -5,10 +5,12 @@ import com.niyovi.proyecto.model.TipoDocumento;
 import com.niyovi.proyecto.model.Usuario;
 import com.niyovi.proyecto.repository.EstadoRepository;
 import com.niyovi.proyecto.repository.UsuarioRepository;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.data.domain.Page;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collections;
 import java.util.List;
@@ -96,13 +99,34 @@ public class UsuarioService implements UserDetailsService {
 
     public void enviarCorreoRecuperacion(String correoUsuario, String claveTemporal) {
         try {
-            SimpleMailMessage mensaje = new SimpleMailMessage();
-            mensaje.setTo(correoUsuario);
-            mensaje.setSubject("Recuperación de contraseña");
-            mensaje.setText("Tu nueva contraseña temporal es: " + claveTemporal);
+            MimeMessage mensaje = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
+            helper.setTo(correoUsuario);
+            helper.setSubject("Recuperación de contraseña");
+            String contenidoHtml = String.format("""
+                    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 600px; margin: auto; background: #fff;">
+                        <div style="text-align: center; padding-bottom: 20px;">
+                            <h1 style="color: #D35400; margin: 0;">Alimentos Niyovi SAS</h1>
+                        </div>
+                        <hr style="border: 0; height: 1px; background: #D35400; margin-bottom: 20px;">
+                        <h2 style="color: #D35400; text-align: center;">Recuperación de Contraseña</h2>
+                        <p>Hola,</p>
+                        <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+                        <p><strong>Tu nueva contraseña temporal es:</strong></p>
+                        <p style="font-size: 20px; font-weight: bold; background: #f4f4f4; padding: 12px; text-align: center; border-radius: 5px; display: inline-block;">
+                            %s
+                        </p>
+                        <p>Te recomendamos cambiar esta contraseña lo antes posible desde la configuración de tu cuenta.</p>
+                        <br>
+                        <hr style="border: 0; height: 1px; background: #ddd; margin-bottom: 20px;">
+                        <p style="text-align: center; font-size: 12px; color: #777;">Alimentos Niyovi SAS</p>
+                        <p style="text-align: center; font-size: 12px; color: #777;">Nit: 9014298845</p>
+                        <p style="text-align: center; font-size: 12px; color: #777;">Finca El Triunfo Km 16 Vía Apulo Naranjalito, Apulo, Cundinamarca</p>
+                    </div>
+                    """, claveTemporal);
+            helper.setText(contenidoHtml, true);
             javaMailSender.send(mensaje);
         } catch (Exception e) {
-            System.out.println("Error al enviar el correo: " + e.getMessage());
             throw new RuntimeException("No se pudo enviar el correo de recuperación.");
         }
     }
@@ -114,21 +138,42 @@ public class UsuarioService implements UserDetailsService {
 
     public void enviarCorreoRecuperacionUsuario(String correoUsuario, String nombreUsuario) {
         try {
-            SimpleMailMessage mensaje = new SimpleMailMessage();
-            mensaje.setTo(correoUsuario);
-            mensaje.setSubject("Recuperación de nombre de usuario");
-            mensaje.setText("Tu nombre de usuario es: " + nombreUsuario);
+            MimeMessage mensaje = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
+            helper.setTo(correoUsuario);
+            helper.setSubject("Recuperación de nombre de usuario");
+            String contenidoHtml = String.format("""
+                    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 600px; margin: auto; background: #fff;">
+                        <div style="text-align: center; padding-bottom: 20px;">
+                            <h1 style="color: #D35400; margin: 0;">Alimentos Niyovi SAS</h1>
+                        </div>
+                        <hr style="border: 0; height: 1px; background: #D35400; margin-bottom: 20px;">
+                        <h2 style="color: #D35400; text-align: center;">Recuperación de Nombre de Usuario</h2>
+                        <p>Hola,</p>
+                        <p>Hemos recibido una solicitud para recuperar tu nombre de usuario.</p>
+                        <p><strong>Tu nombre de usuario es:</strong></p>
+                        <p style="font-size: 20px; font-weight: bold; background: #f4f4f4; padding: 12px; text-align: center; border-radius: 5px; display: inline-block;">
+                            %s
+                        </p>
+                        <p>Si no solicitaste esta recuperación, puedes ignorar este mensaje.</p>
+                        <br>
+                        <hr style="border: 0; height: 1px; background: #ddd; margin-bottom: 20px;">
+                        <p style="text-align: center; font-size: 12px; color: #777;">Alimentos Niyovi SAS</p>
+                        <p style="text-align: center; font-size: 12px; color: #777;">Nit: 9014298845</p>
+                        <p style="text-align: center; font-size: 12px; color: #777;">Finca El Triunfo Km 16 Vía Apulo Naranjalito, Apulo, Cundinamarca</p>
+                    </div>
+                    """, nombreUsuario);
+            helper.setText(contenidoHtml, true);
             javaMailSender.send(mensaje);
         } catch (Exception e) {
-            System.out.println("Error al enviar el correo: " + e.getMessage());
             throw new RuntimeException("No se pudo enviar el correo de recuperación.");
         }
     }
 
-    public List<Usuario> obtenerUsuariosActivos() {
+    public Page<Usuario> obtenerUsuariosActivos(Pageable pageable) {
         Estado estadoActivo = estadoRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
-        return usuarioRepository.findByEstadoUsuario(estadoActivo);
+        return usuarioRepository.findByEstadoUsuario(estadoActivo, pageable);
     }
 
     public void actualizarUsuario(Usuario usuario) {
@@ -159,6 +204,13 @@ public class UsuarioService implements UserDetailsService {
         return usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
+    public Page<Usuario> buscarPorTipoYNumeroDocumento(TipoDocumento tipoDocumento, String numeroDocumento, Pageable pageable) {
+        if (tipoDocumento == null || numeroDocumento == null || numeroDocumento.isEmpty()) {
+            return Page.empty();
+        }
+        return usuarioRepository.findByTipoDocUsuarioAndNumeroDocUsuario(tipoDocumento, numeroDocumento, pageable);
+    }
+
     public List<Usuario> buscarPorTipoYNumeroDocumento(TipoDocumento tipoDocumento, String numeroDocumento) {
         if (tipoDocumento == null || numeroDocumento == null || numeroDocumento.isEmpty()) {
             return Collections.emptyList();
@@ -174,7 +226,6 @@ public class UsuarioService implements UserDetailsService {
         usuarioExistente.setCelularUsuario(usuario.getCelularUsuario());
         usuarioExistente.setDireccionUsuario(usuario.getDireccionUsuario());
         usuarioExistente.setCorreoUsuario(usuario.getCorreoUsuario());
-        usuarioExistente.setUsuarioUsuario(usuario.getUsuarioUsuario());
         if (usuario.getClaveUsuario() != null && !usuario.getClaveUsuario().isEmpty()) {
             String nuevaClaveEncriptada = passwordEncoder.encode(usuario.getClaveUsuario());
             usuarioExistente.setClaveUsuario(nuevaClaveEncriptada);

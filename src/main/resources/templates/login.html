@@ -6,14 +6,21 @@
     <title>Inicio Sesión</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center min-vh-100">
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
+<div class="bg-custom p-4 rounded-5 text-secondary mt-2">
+    <div class="container-fluid d-flex justify-content-center" style="max-width: 100rem;">
+        <img src="/login.png" alt="Login" style="height: 150px;"/>
+    </div>
 
-    <h2 class="text-center">Inicio Sesión</h2>
+    <h2 class="text-center text-brown">Ingresa ahora</h2>
 
     <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
         <p>Credenciales incorrectas. Inténtalo de nuevo.</p>
@@ -36,28 +43,32 @@
 
         <input type="hidden" name="from" th:if="${param.from != null}" th:value="${param.from}">
 
-        <div class="row mb-3">
-            <label for="usuarioUsuario" class="col-sm-2 col-form-label">Usuario</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="usuarioUsuario" name="username" required>
+        <div class="input-group mt-3">
+            <div class="input-group-text bg-Light">
+                <i class="bi bi-person"></i>
             </div>
+            <input type="text" class="form-control" id="usuarioUsuario" name="username" required>
         </div>
 
-        <div class="row mb-3">
-            <label for="claveUsuario" class="col-sm-2 col-form-label">Contraseña</label>
-            <div class="col-sm-10">
-                <input type="password" class="form-control" id="claveUsuario" name="password" required>
+        <div class="input-group mt-2">
+            <div class="input-group-text bg-Light">
+                <i class="bi bi-lock"></i>
             </div>
+            <input type="password" class="form-control" id="claveUsuario" name="password" required>
         </div>
 
-        <div class="d-flex justify-content-end">
-            <a href="/recuperar-usuario" class="me-3">¿Olvidó su usuario?</a>
-            <a href="/recuperar-contraseña">¿Olvidó su contraseña?</a>
+        <div class="text-decoration-none text-info fw-semibold mt-4">
+            <a href="/recuperar-usuario" class="me-1 text-brown">¿Olvidó su usuario?</a>
+            <a href="/recuperar-contraseña" class="me-1 text-brown">¿Olvidó su contraseña?</a>
         </div>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            <button type="submit" class="btn btn-custom shadow">Iniciar Sesión</button>
         </div>
+
+        <footer class="bg-dark text-center text-white py-9 mt-10 fixed-bottom img-fluid">
+            <img src="1.png" alt="footer" style="max-width: 100%; height: auto;"/>
+        </footer>
     </form>
 </div>
 

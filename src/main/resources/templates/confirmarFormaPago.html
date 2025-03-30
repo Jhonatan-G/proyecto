@@ -16,6 +16,27 @@
         .summary-total {
             font-weight: bold;
         }
+        .qr-code {
+            width: 150px;
+            display: none;
+            margin-top: 10px;
+        }
+        .phone-number {
+            display: none;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .qr-container .phone-number {
+            margin-top: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -53,6 +74,14 @@
                         <label class="form-check-label" th:for="'forma-' + ${formaPago.idFormaPago}">
                             <span th:text="${formaPago.nombreFormaPago}">Forma de pago</span>
                         </label>
+                        <div class="qr-container" th:if="${formaPago.nombreFormaPago == 'Nequi'}">
+                            <img src="/qr_nequi.jpg" class="qr-code" id="qr-nequi">
+                            <p class="phone-number" id="phone-nequi">📞 3101234567</p>
+                        </div>
+                        <div class="qr-container" th:if="${formaPago.nombreFormaPago == 'Daviplata'}">
+                            <img src="/qr_nequi.jpg" class="qr-code" id="qr-daviplata">
+                            <p class="phone-number" id="phone-daviplata">📞 3101234568</p>
+                        </div>
                     </div>
                 </div>
 
@@ -118,6 +147,27 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const formasPago = document.querySelectorAll('input[name="formaPagoSeleccionado"]');
+        const comprobanteInput = document.getElementById("comprobantePago");
+        formasPago.forEach(forma => {
+            forma.addEventListener("change", function () {
+                document.querySelectorAll('.qr-code').forEach(img => img.style.display = 'none');
+                document.querySelectorAll('.phone-number').forEach(p => p.style.display = 'none');
+                const selectedPayment = this.nextElementSibling.innerText.trim().toLowerCase();
+                if (selectedPayment === "nequi") {
+                    document.getElementById("qr-nequi").style.display = "block";
+                    document.getElementById("phone-nequi").style.display = "block";
+                } else if (selectedPayment === "daviplata") {
+                    document.getElementById("qr-daviplata").style.display = "block";
+                    document.getElementById("phone-daviplata").style.display = "block";
+                }
+                if (selectedPayment === "nequi" || selectedPayment === "daviplata") {
+                    comprobanteInput.setAttribute("required", "true");
+                } else {
+                    comprobanteInput.removeAttribute("required");
+                }
+            });
+        });
         actualizarCarrito();
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
         let totalProductos = 0;

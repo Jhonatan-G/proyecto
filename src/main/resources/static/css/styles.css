@@ -1,0 +1,125 @@
+body {
+    background-color: #FBF9F5 !important;
+    font-family: 'Roboto', sans-serif;
+}
+
+.bg-custom {
+    background-color: #f5f5f5 !important;
+}
+
+.bg-F3EBE1 {
+    background-color: #fefdfd !important;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.navbar-custom {
+    background-color: #533a35 !important;
+}
+
+.navbar-brand {
+    color: #FAFAFA !important;
+    font-weight: bold !important;
+}
+
+.btn-custom {
+    background-color: #FAF7F3 !important;
+    color: #342b28 !important;
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #EDE0D4 !important;
+    color: #5D2E0F !important;
+}
+
+.text-brown {
+    color: #342b28 !important;
+    font-weight: bold;
+}
+
+.input-custom {
+    color: #342b28 !important;
+}
+
+.input-custom::placeholder {
+    color: #342b28  !important;
+    opacity: 1;
+}
+
+.input-custom::-moz-placeholder {
+    color: #342b28 !important;
+    opacity: 1 !important;
+}
+
+.input-custom:-ms-input-placeholder {
+    color: #342b28 !important;
+    opacity: 1 !important;
+}
+
+.input-custom::-webkit-input-placeholder {
+    color: #342b28 !important;
+    opacity: 1 !important;
+}
+
+.valid {
+    color: green;
+}
+
+.invalid {
+    color: red;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.btn-sm {
+    font-size: 0.875rem;
+}
+
+.table-custom thead th {
+    background-color: #533a35;
+    color: white;
+}
+
+.td-dato {
+    background-color: #533a35;
+    color: white;
+}
+
+.btn-edit {
+    background-color: #91665D;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #777170;
+    color: white;
+}
+
+.product-img {
+    width: 100px;
+    height: auto;
+}
+
+.c-item {
+    height: 480px;
+}
+
+.c-img {
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.6);
+}

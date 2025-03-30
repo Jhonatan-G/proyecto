@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpSession;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -122,6 +125,7 @@ public class ProductoController {
     @GetMapping("/consultar-productos")
     public String mostrarProductosActivos(@RequestParam(value = "categoriaProducto", required = false) Long categoriaId,
                                           @RequestParam(value = "nombreProducto", required = false) String nombreProducto,
+                                          @RequestParam(defaultValue = "0") int page,
                                           Model model, Principal principal) {
         Usuario usuariom = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuariom.getRolUsuario();
@@ -129,10 +133,13 @@ public class ProductoController {
         Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
         List<Categoria> categorias = categoriaService.obtenerCategoriasActivas(estadoActivo);
         model.addAttribute("categorias", categorias);
-        List<Producto> productosActivos = productoService.obtenerProductosActivos();
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<Producto> productosActivos = productoService.obtenerProductosActivos(pageable);
         model.addAttribute("productos", productosActivos);
-        List<Producto> productos = productoService.filtrarProductos(categoriaId, nombreProducto);
+        Page<Producto> productos = productoService.filtrarProductos(categoriaId, nombreProducto, pageable);
         model.addAttribute("productos", productos);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productos.getTotalPages());
         return "consultarProductos";
     }
 

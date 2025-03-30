@@ -10,9 +10,13 @@ import com.niyovi.proyecto.repository.EstadoRepository;
 import com.niyovi.proyecto.repository.RolRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -42,11 +46,10 @@ public class UsuarioController {
     }
 
     @GetMapping("/registrarse")
-    public String mostrarFormularioRegistroCliente(Model model) {
+    public String mostrarFormularioRegistroCliente(@ModelAttribute("usuario") Usuario usuario, Model model) {
         Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
         List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
         Rol rolCliente = rolRepository.findById(2L).orElseThrow(() -> new RuntimeException("Rol cliente no encontrado"));
-        model.addAttribute("usuario", new Usuario());
         model.addAttribute("tiposDocumento", tiposDocumento);
         model.addAttribute("rol", rolCliente);
         return "registroCliente";
@@ -55,10 +58,21 @@ public class UsuarioController {
     @PostMapping("/registrarse")
     public String registrarUsuarioCliente(@ModelAttribute("usuario") Usuario usuario,
                                           @RequestParam(value = "from", required = false) String from,
-                                          RedirectAttributes redirectAttributes) {
+                                          RedirectAttributes redirectAttributes, Model model, BindingResult result) {
+        if (result.hasErrors()) {
+            model.addAttribute("usuario", usuario);
+            return "registroCliente";
+        }
         Usuario usuarioExistente = usuarioService.buscarPorUsuario(usuario.getUsuarioUsuario());
         if (usuarioExistente != null) {
             redirectAttributes.addFlashAttribute("mensajeError", "Usuario ya existe, intente con otro nombre de usuario.");
+            redirectAttributes.addFlashAttribute("usuario", usuario);
+            return "redirect:/registrarse" + (from != null ? "?from=" + from : "");
+        }
+        List<Usuario> usuariosConMismoDoc = usuarioService.buscarPorTipoYNumeroDocumento(usuario.getTipoDocUsuario(), usuario.getNumeroDocUsuario());
+        if (!usuariosConMismoDoc.isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Ya existe un usuario con este tipo y número de documento.");
+            redirectAttributes.addFlashAttribute("usuario", usuario);
             return "redirect:/registrarse" + (from != null ? "?from=" + from : "");
         }
         try {
@@ -71,6 +85,7 @@ public class UsuarioController {
             return "redirect:/login" + (from != null ? "?from=" + from : "");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al registrar usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("usuario", usuario);
             return "redirect:/registrarse" + (from != null ? "?from=" + from : "");
         }
     }
@@ -82,21 +97,30 @@ public class UsuarioController {
     }
 
     @GetMapping("/registrar-empleado")
-    public String mostrarFormularioRegistroEmpleado(Model model, Principal principal) {
+    public String mostrarFormularioRegistroEmpleado(@ModelAttribute("usuario") Usuario usuario, Model model, Principal principal) {
         Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
         List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
         List<Rol> roles = rolRepository.findByEstadoRol(estadoActivo);
-        Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
-        Rol rolUsuario = usuario.getRolUsuario();
+        Usuario usuarioSesion = usuarioService.buscarPorUsuario(principal.getName());
+        Rol rolUsuario = usuarioSesion.getRolUsuario();
         model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        model.addAttribute("usuario", new Usuario());
         model.addAttribute("tiposDocumento", tiposDocumento);
         model.addAttribute("roles", roles);
         return "registroEmpleado";
     }
 
     @PostMapping("/registrar-empleado")
-    public String registrarUsuarioEmpleado(@ModelAttribute("usuario") Usuario usuario, Model model, Principal principal) {
+    public String registrarUsuarioEmpleado(@ModelAttribute("usuario") Usuario usuario, BindingResult result, Model model, Principal principal) {
+        if (result.hasErrors()) {
+            Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+            List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
+            List<Rol> roles = rolRepository.findByEstadoRol(estadoActivo);
+            model.addAttribute("tiposDocumento", tiposDocumento);
+            model.addAttribute("roles", roles);
+            Usuario usuarioActual = usuarioService.buscarPorUsuario(principal.getName());
+            model.addAttribute("rolUsuario", usuarioActual.getRolUsuario().getIdRol());
+            return "registroEmpleado";
+        }
         Usuario usuarioExistente = usuarioService.buscarPorUsuario(usuario.getUsuarioUsuario());
         if (usuarioExistente != null) {
             model.addAttribute("mensajeError", "Usuario ya existe, intente con otro nombre de usuario.");
@@ -105,6 +129,20 @@ public class UsuarioController {
             List<Rol> roles = rolRepository.findByEstadoRol(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
             model.addAttribute("roles", roles);
+            Usuario usuarioActual = usuarioService.buscarPorUsuario(principal.getName());
+            model.addAttribute("rolUsuario", usuarioActual.getRolUsuario().getIdRol());
+            return "registroEmpleado";
+        }
+        List<Usuario> usuariosConMismoDoc = usuarioService.buscarPorTipoYNumeroDocumento(usuario.getTipoDocUsuario(), usuario.getNumeroDocUsuario());
+        if (!usuariosConMismoDoc.isEmpty()) {
+            model.addAttribute("mensajeError", "Ya existe un usuario con este tipo y número de documento.");
+            Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+            List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
+            List<Rol> roles = rolRepository.findByEstadoRol(estadoActivo);
+            model.addAttribute("tiposDocumento", tiposDocumento);
+            model.addAttribute("roles", roles);
+            Usuario usuarioActual = usuarioService.buscarPorUsuario(principal.getName());
+            model.addAttribute("rolUsuario", usuarioActual.getRolUsuario().getIdRol());
             return "registroEmpleado";
         }
         try {
@@ -119,6 +157,9 @@ public class UsuarioController {
             List<Rol> roles = rolRepository.findByEstadoRol(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
             model.addAttribute("roles", roles);
+            Usuario usuarioActual = usuarioService.buscarPorUsuario(principal.getName());
+            model.addAttribute("rolUsuario", usuarioActual.getRolUsuario().getIdRol());
+            return "registroEmpleado";
         }
         Usuario usuariom = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuariom.getRolUsuario();
@@ -229,6 +270,7 @@ public class UsuarioController {
     @GetMapping("/consultar-usuarios")
     public String mostrarUsuariosActivos(@RequestParam(required = false) Long tipoDocUsuario,
                                          @RequestParam(required = false) String numeroDocUsuario,
+                                         @RequestParam(defaultValue = "0") int page,
                                          Model model, Principal principal) {
         Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
         List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
@@ -238,20 +280,22 @@ public class UsuarioController {
         model.addAttribute("usuario", new Usuario());
         model.addAttribute("tiposDocumento", tiposDocumento);
         try {
-            List<Usuario> usuarios;
+            Page<Usuario> usuarios;
+            Pageable pageable = PageRequest.of(page, 5);
             if (tipoDocUsuario != null && numeroDocUsuario != null && !numeroDocUsuario.isEmpty()) {
                 TipoDocumento tipoDoc = tipoDocumentoService.obtenerPorId(tipoDocUsuario);
                 if (tipoDoc != null) {
-                    usuarios = usuarioService.buscarPorTipoYNumeroDocumento(tipoDoc, numeroDocUsuario);
+                    usuarios = usuarioService.buscarPorTipoYNumeroDocumento(tipoDoc, numeroDocUsuario, pageable);
                 } else {
                     model.addAttribute("mensajeError", "Tipo de documento no encontrado.");
-                    usuarios = usuarioService.obtenerUsuariosActivos();
+                    usuarios = usuarioService.obtenerUsuariosActivos(pageable);
                 }
-                model.addAttribute("usuarios", usuarios);
             } else {
-                usuarios = usuarioService.obtenerUsuariosActivos();
-                model.addAttribute("usuarios", usuarios);
+                usuarios = usuarioService.obtenerUsuariosActivos(pageable);
             }
+            model.addAttribute("usuariosPage", usuarios);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", usuarios.getTotalPages());
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Ocurrió un error al recuperar los usuarios.");
@@ -325,7 +369,7 @@ public class UsuarioController {
             usuario.setIdUsuario(usuarioExistente.getIdUsuario());
             usuarioService.editarPerfil(usuario);
             redirectAttributes.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
-            return "redirect:/";
+            return "redirect:/catalogo-productos";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al actualizar el usuario: " + e.getMessage());
             return "redirect:/editar-perfil";

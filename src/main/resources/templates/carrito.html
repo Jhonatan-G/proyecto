@@ -25,7 +25,7 @@
             border-bottom: 1px solid #e9ecef;
         }
         .cart-item:last-child {
-            border-bottom: none; /* Sin borde en el último elemento */
+            border-bottom: none;
         }
         .cart-item .product-details {
             flex-grow: 1;
@@ -57,6 +57,15 @@
 <div class="container mt-5">
 
     <h2 class="text-center">Carrito Compras</h2>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeExito}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <p th:text="${mensajeError}"></p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
     <div class="row">
         <div class="col-md-8">
@@ -146,7 +155,7 @@
                     </div>
                     <div class="quantity-controls">
                         <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity('${productId}')">-</button>
-                        <input type="number" class="form-control" value="${cantidad}" min="1" max="20" readonly>
+                        <input type="number" class="form-control cantidad-input" id="cantidad-${productId}" value="${cantidad}" min="1" max="1000" onchange="updateQuantity('${productId}')" style="width: 100px;">
                         <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity('${productId}')">+</button>
                     </div>
                     <button class="btn btn-danger ms-3" onclick="eliminarProducto('${productId}')">Eliminar</button>
@@ -165,10 +174,22 @@
         cartCountElement.textContent = totalItems;
     }
 
+    function increaseQuantity(productId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || {};
+        if (cart[productId]) {
+            cart[productId].cantidad++;
+            document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        mostrarCarrito();
+        actualizarCarrito();
+    }
+
     function decreaseQuantity(productId) {
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
         if (cart[productId].cantidad > 1) {
             cart[productId].cantidad--;
+            document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
         } else {
             delete cart[productId];
         }
@@ -177,11 +198,15 @@
         actualizarCarrito();
     }
 
-    function increaseQuantity(productId) {
+    function updateQuantity(productId) {
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        if (cart[productId]) {
-            cart[productId].cantidad++;
+        let inputElement = document.getElementById(`cantidad-${productId}`);
+        let nuevaCantidad = parseInt(inputElement.value);
+        if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+            inputElement.value = cart[productId].cantidad;
+            return;
         }
+        cart[productId].cantidad = nuevaCantidad;
         localStorage.setItem('cart', JSON.stringify(cart));
         mostrarCarrito();
         actualizarCarrito();

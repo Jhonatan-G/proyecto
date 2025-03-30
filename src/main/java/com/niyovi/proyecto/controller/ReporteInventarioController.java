@@ -181,7 +181,7 @@ public class ReporteInventarioController {
         empresaCell.setCellStyle(headerStyle);
         Row nitRow = sheet.createRow(rowNum++);
         Cell nitCell = nitRow.createCell(0);
-        nitCell.setCellValue("Nit: 1234567890");
+        nitCell.setCellValue("Nit: 9014298845");
         Row direccionRow = sheet.createRow(rowNum++);
         Cell direccionCell = direccionRow.createCell(0);
         direccionCell.setCellValue("Finca El Triunfo Km 16 Vía Apulo Naranjalito, Apulo, Cundinamarca");
@@ -343,7 +343,7 @@ public class ReporteInventarioController {
         titulo.setSpacingAfter(10);
         document.add(titulo);
         document.add(new Paragraph("Alimentos Niyovi SAS", boldFont));
-        document.add(new Paragraph("Nit: 1234567890"));
+        document.add(new Paragraph("Nit: 9014298845"));
         document.add(new Paragraph("Finca El Triunfo Km 16 Vía Apulo Naranjalito, Apulo, Cundinamarca"));
         LocalDateTime fechaHoraActual = LocalDateTime.now();
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd-MM-yyyy");

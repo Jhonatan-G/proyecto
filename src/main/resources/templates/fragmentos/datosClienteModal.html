@@ -1,0 +1,34 @@
+<div xmlns:th="http://www.w3.org/1999/xhtml">
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <td><strong>Tipo de Documento</strong></td>
+            <td th:text="${usuario.tipoDocUsuario.nombreTipoDoc}"></td>
+        </tr>
+        <tr>
+            <td><strong>Número de Documento</strong></td>
+            <td th:text="${usuario.numeroDocUsuario}"></td>
+        </tr>
+        <tr>
+            <td><strong>Nombres</strong></td>
+            <td th:text="${usuario.nombresUsuario}"></td>
+        </tr>
+        <tr>
+            <td><strong>Apellidos</strong></td>
+            <td th:text="${usuario.apellidosUsuario}"></td>
+        </tr>
+        <tr>
+            <td><strong>Celular</strong></td>
+            <td th:text="${usuario.celularUsuario}"></td>
+        </tr>
+        <tr>
+            <td><strong>Dirección</strong></td>
+            <td th:text="${usuario.direccionUsuario}"></td>
+        </tr>
+        <tr>
+            <td><strong>Correo</strong></td>
+            <td th:text="${usuario.correoUsuario}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -51,7 +51,7 @@ public class FacturaController {
             titulo.setSpacingAfter(10);
             document.add(titulo);
             document.add(new Paragraph("Alimentos Niyovi SAS", boldFont));
-            document.add(new Paragraph("Nit: 1234567890"));
+            document.add(new Paragraph("Nit: 9014298845"));
             document.add(new Paragraph("Finca El Triunfo Km 16 Vía Apulo Naranjalito, Apulo, Cundinamarca"));
             document.add(new Paragraph("\n"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

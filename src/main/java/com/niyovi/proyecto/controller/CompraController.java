@@ -22,6 +22,9 @@ import jakarta.servlet.http.HttpSession;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -208,12 +211,26 @@ public class CompraController {
             }
             FormaPago formaPago = formaPagoRepository.findById(idFormaPago)
                     .orElseThrow(() -> new RuntimeException("Forma de pago no válida"));
-            Estado estadoPendiente = estadoRepository.findById(3L)
-                    .orElseThrow(() -> new RuntimeException("Estado 'recibido' no encontrado"));
+            if ((formaPago.getNombreFormaPago().equalsIgnoreCase("Nequi") ||
+                    formaPago.getNombreFormaPago().equalsIgnoreCase("Daviplata"))
+                    && (imagenFile == null || imagenFile.isEmpty())) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Debe adjuntar un comprobante de pago para Nequi o Daviplata.");
+                return "redirect:/confirmar-forma-pago";
+            }
+            Estado estadoCompra;
+            if (formaPago.getNombreFormaPago().equalsIgnoreCase("Nequi") ||
+                    formaPago.getNombreFormaPago().equalsIgnoreCase("Daviplata")) {
+                estadoCompra = estadoRepository.findById(7L)
+                        .orElseThrow(() -> new RuntimeException("Estado 'Pendiente' no encontrado"));
+                compra.setObservacionCompra("Revisando comprobante de pago.");
+            } else {
+                estadoCompra = estadoRepository.findById(3L)
+                        .orElseThrow(() -> new RuntimeException("Estado 'Recibido' no encontrado"));
+            }
             compra.setUsuarioCompra(usuario);
             compra.setMetodoEntregaCompra(metodoEntregaSeleccionado);
             compra.setFormaPagoCompra(formaPago);
-            compra.setEstadoCompra(estadoPendiente);
+            compra.setEstadoCompra(estadoCompra);
             List<DetalleCompra> detalles = new ArrayList<>();
             double totalCompra = 0.0;
             for (Producto productoCarrito : carrito) {
@@ -224,6 +241,7 @@ public class CompraController {
                     return "redirect:/carrito";
                 }
             }
+            List<Producto> productosBajoStock = new ArrayList<>();
             for (Producto productoCarrito : carrito) {
                 Producto productoExistente = productoRepository.findById(productoCarrito.getIdProducto())
                         .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + productoCarrito.getIdProducto()));
@@ -237,6 +255,12 @@ public class CompraController {
                 totalCompra += detalle.getSubtotalDetalle();
                 productoExistente.setStockProducto(productoExistente.getStockProducto() - productoCarrito.getCantidadCarrito());
                 productoRepository.save(productoExistente);
+                int nuevoStock = productoExistente.getStockProducto() - productoCarrito.getCantidadCarrito();
+                productoExistente.setStockProducto(nuevoStock);
+                productoRepository.save(productoExistente);
+                if (nuevoStock < 5) {
+                    productosBajoStock.add(productoExistente);
+                }
                 MovimientoInventario movimiento = new MovimientoInventario();
                 movimiento.setProducto(productoExistente);
                 movimiento.setCantidad(productoCarrito.getCantidadCarrito());
@@ -251,7 +275,10 @@ public class CompraController {
             if (correoAdministrador != null) {
                 compraService.enviarCorreoNuevoPedido(correoAdministrador, compra, detalles);
             }
-            redirectAttributes.addFlashAttribute("mensajeExito", "Compra realizada exitosamente.");
+            if (!productosBajoStock.isEmpty() && correoAdministrador != null) {
+                compraService.enviarCorreoBajoStock(correoAdministrador, productosBajoStock);
+            }
+            redirectAttributes.addFlashAttribute("mensajeExito", "Tu pedido ha sido creado.");
             redirectAttributes.addFlashAttribute("compraExitosa", true);
             return "redirect:/mis-compras";
         } catch (Exception e) {
@@ -263,20 +290,26 @@ public class CompraController {
 
     @GetMapping("/mis-compras")
     public String mostrarMisCompras(@RequestParam(value = "estadoCompra", required = false) Long estadoCompraId,
+                                    @RequestParam(defaultValue = "0") int page,
                                     Model model, Principal principal) {
         Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuario.getRolUsuario();
         model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        List<Compra> comprasUsuario = compraRepository.findByUsuarioCompra(usuario);
-        List<Compra> comprasFiltradas = (estadoCompraId != null)
-                ? comprasUsuario.stream()
-                .filter(c -> c.getEstadoCompra().getIdEstado().equals(estadoCompraId))
-                .toList()
-                : comprasUsuario;
-        model.addAttribute("compras", comprasFiltradas);
-        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L);
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<Compra> comprasUsuario;
+        if (estadoCompraId != null) {
+            Estado estado = estadoService.obtenerPorId(estadoCompraId);
+            comprasUsuario = compraRepository.findByUsuarioCompraAndEstadoCompra(usuario, estado, pageable);
+        } else {
+            comprasUsuario = compraRepository.findByUsuarioCompra(usuario, pageable);
+        }
+        model.addAttribute("compras", comprasUsuario.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", comprasUsuario.getTotalPages());
+        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L, 7L, 8L);
         List<Estado> estados = estadoService.listarEstadosParaPedidos(idsEstadosPedidos);
         model.addAttribute("estados", estados);
+        model.addAttribute("estadoSeleccionado", estadoCompraId);
         return "misCompras";
     }
 
@@ -296,17 +329,27 @@ public class CompraController {
     }
 
     @GetMapping("/pedidos")
-    public String mostrarPedidos(@RequestParam(value = "estadoCompra", required = false) Long estadoCompraId, Model model, Principal principal) {
+    public String mostrarPedidos(@RequestParam(value = "estadoCompra", required = false) Long estadoCompraId,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 Model model, Principal principal) {
         Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuario.getRolUsuario();
         model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L);
+        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L, 7L, 8L);
         List<Estado> estados = estadoService.listarEstadosParaPedidos(idsEstadosPedidos);
-        List<Compra> compras = compraRepository.findAll();
-        model.addAttribute("compras", compras);
-        List<Compra> compraf = compraService.filtrarCompras(estadoCompraId);
-        model.addAttribute("compras", compraf);
         model.addAttribute("estados", estados);
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<Compra> compras;
+        if (estadoCompraId != null) {
+            Estado estado = estadoService.obtenerPorId(estadoCompraId);
+            compras = compraRepository.findByEstadoCompra(estado, pageable);
+        } else {
+            compras = compraRepository.findAll(pageable);
+        }
+        model.addAttribute("compras", compras.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", compras.getTotalPages());
+        model.addAttribute("estadoSeleccionado", estadoCompraId);
         return "pedidos";
     }
 
@@ -323,7 +366,7 @@ public class CompraController {
     @GetMapping("/editar-pedido/{id}")
     public String mostrarFormularioEdicionPedido(@PathVariable Long id, Model model, Principal principal) {
         Compra compra = compraService.obtenerCompraPorId(id);
-        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L);
+        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L, 7L, 8L);
         List<Estado> estados = estadoService.listarEstadosParaPedidos(idsEstadosPedidos);
         Usuario usuariom = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuariom.getRolUsuario();
@@ -409,16 +452,29 @@ public class CompraController {
     public String reseñaPedido(@ModelAttribute("pedido") Compra compra, RedirectAttributes redirectAttributes) {
         try {
             Compra compraExistente = compraService.obtenerCompraPorId(compra.getIdCompra());
+            compraExistente.setCalificacionCompra(compra.getCalificacionCompra());
             compraExistente.setReseñaCompra(compra.getReseñaCompra());
             compraService.actualizarCompra(compraExistente);
             String correoAdministrador = usuarioService.obtenerCorreoAdministrador();
             if (correoAdministrador != null) {
-                compraService.enviarCorreoReseñaPedido(correoAdministrador, compraExistente.getIdCompra(), compraExistente.getReseñaCompra());
+                compraService.enviarCorreoReseñaPedido(correoAdministrador, compraExistente.getIdCompra(), compraExistente.getCalificacionCompra(), compraExistente.getReseñaCompra());
             }
             redirectAttributes.addFlashAttribute("mensajeExito", "Reseña actualizada correctamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al actualizar la reseña.");
         }
         return "redirect:/mis-compras";
+    }
+
+    @GetMapping("/pedidos/cliente/{idCompra}")
+    public String verDatosCliente(@PathVariable Long idCompra, Model model) {
+        Compra compra = compraRepository.findById(idCompra)
+                .orElseThrow(() -> new RuntimeException("Compra no encontrada"));
+        Usuario usuario = compra.getUsuarioCompra();
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado para la compra ID: " + idCompra);
+        }
+        model.addAttribute("usuario", usuario);
+        return "fragmentos/datosClienteModal";
     }
 }

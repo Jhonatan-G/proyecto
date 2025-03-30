@@ -41,6 +41,9 @@ public class Compra {
     @Column(name = "observacion_compra")
     private String observacionCompra;
 
+    @Column(name = "calificacion_compra")
+    private Integer calificacionCompra;
+
     @Column(name = "reseña_compra")
     private String reseñaCompra;
 
@@ -117,6 +120,14 @@ public class Compra {
 
     public void setObservacionCompra(String observacionCompra) {
         this.observacionCompra = observacionCompra;
+    }
+
+    public Integer getCalificacionCompra() {
+        return calificacionCompra;
+    }
+
+    public void setCalificacionCompra(Integer calificacionCompra) {
+        this.calificacionCompra = calificacionCompra;
     }
 
     public String getReseñaCompra() {

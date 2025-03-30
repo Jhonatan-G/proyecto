@@ -7,6 +7,8 @@ import com.niyovi.proyecto.repository.CategoriaRepository;
 import com.niyovi.proyecto.repository.EstadoRepository;
 import com.niyovi.proyecto.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -35,6 +37,12 @@ public class ProductoService {
         return productoRepository.findByEstadoProducto(estadoActivo);
     }
 
+    public Page<Producto> obtenerProductosActivos(Pageable pageable) {
+        Estado estadoActivo = estadoRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+        return productoRepository.findByEstadoProducto(estadoActivo, pageable);
+    }
+
     public List<Producto> filtrarProductos(Long categoriaId, String nombreProducto) {
         Categoria categoria = null;
         if (categoriaId != null) {
@@ -42,15 +50,34 @@ public class ProductoService {
                     .orElse(null);
         }
         if (categoria != null && nombreProducto != null && !nombreProducto.isEmpty()) {
-            return productoRepository.findByCategoriaProductoAndNombreProducto(categoria, nombreProducto);
+            return productoRepository.findByCategoriaProductoAndNombreProductoContainingIgnoreCase(categoria, nombreProducto);
         } else if (categoria != null) {
             return productoRepository.findByCategoriaProducto(categoria);
         } else if (nombreProducto != null && !nombreProducto.isEmpty()) {
-            return productoRepository.findByNombreProducto(nombreProducto);
+            return productoRepository.findByNombreProductoContainingIgnoreCase(nombreProducto);
         } else {
             Estado estadoActivo = estadoRepository.findById(1L)
                     .orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             return productoRepository.findByEstadoProducto(estadoActivo);
+        }
+    }
+
+    public Page<Producto> filtrarProductos(Long categoriaId, String nombreProducto, Pageable pageable) {
+        Categoria categoria = null;
+        if (categoriaId != null) {
+            categoria = categoriaRepository.findById(categoriaId)
+                    .orElse(null);
+        }
+        if (categoria != null && nombreProducto != null && !nombreProducto.isEmpty()) {
+            return productoRepository.findByCategoriaProductoAndNombreProductoContainingIgnoreCase(categoria, nombreProducto, pageable);
+        } else if (categoria != null) {
+            return productoRepository.findByCategoriaProducto(categoria, pageable);
+        } else if (nombreProducto != null && !nombreProducto.isEmpty()) {
+            return productoRepository.findByNombreProductoContainingIgnoreCase(nombreProducto, pageable);
+        } else {
+            Estado estadoActivo = estadoRepository.findById(1L)
+                    .orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
+            return productoRepository.findByEstadoProducto(estadoActivo, pageable);
         }
     }
 
@@ -82,13 +109,13 @@ public class ProductoService {
         if (categoriaId != null && nombreProducto != null && !nombreProducto.isEmpty()) {
             Categoria categoria = categoriaRepository.findById(categoriaId)
                     .orElse(null);
-            productos = productoRepository.findByCategoriaProductoAndNombreProducto(categoria, nombreProducto);
+            productos = productoRepository.findByCategoriaProductoAndNombreProductoContainingIgnoreCase(categoria, nombreProducto);
         } else if (categoriaId != null) {
             Categoria categoria = categoriaRepository.findById(categoriaId)
                     .orElse(null);
             productos = productoRepository.findByCategoriaProducto(categoria);
         } else if (nombreProducto != null && !nombreProducto.isEmpty()) {
-            productos = productoRepository.findByNombreProducto(nombreProducto);
+            productos = productoRepository.findByNombreProductoContainingIgnoreCase(nombreProducto);
         } else {
             productos = productoRepository.findByEstadoProducto(estadoActivo);
         }
