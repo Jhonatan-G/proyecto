@@ -6,20 +6,20 @@
     <title>Mis Compras</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center min-vh-100">
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
+<div class="bg-F3EBE1 mt-5">
+    <div class="container d-flex flex-colum justify-content-center align-items-center w-100 p-3">
+    </div>
 
-    <h2 class="text-center mb-4">Mis Compras</h2>
+    <h2 class="text-center text-brown mb-5">Mis Compras</h2>
 
     <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
         <p th:text="${mensajeExito}"></p>
@@ -39,85 +39,103 @@
         <input type="hidden" id="compraExitosa" th:value="${compraExitosa != null ? 'true' : 'false'}">
 
         <div class="row mb-3">
-            <label for="estadoCompra" class="col-sm-2 col-form-label">Estado</label>
-            <div class="col-sm-10">
-                <select class="form-select" id="estadoCompra" name="estadoCompra">
-                    <option value="" selected disabled>Seleccione el estado</option>
-                    <option th:each="estado : ${estados}" th:value="${estado.idEstado}"
-                            th:text="${estado.nombreEstado}"></option>
-                </select>
+            <div class="row justify-content-center mb-3">
+                <div class="col-sm-12 col-md-6">
+                    <select class="form-select" id="estadoCompra" name="estadoCompra">
+                        <option value="" selected disabled>Seleccione el estado</option>
+                        <option th:each="estado : ${estados}" th:value="${estado.idEstado}"
+                                th:text="${estado.nombreEstado}"
+                                th:selected="${estado.idEstado == estadoSeleccionado}"></option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="text-center">
-            <button type="submit" class="btn btn-primary">Consultar</button>
-            <a href="/mis-compras" class="btn btn-secondary">Limpiar Filtros</a>
+            <button type="submit" class="btn btn-custom shadow">Consultar</button>
+            <a href="/mis-compras" class="btn btn-custom shadow">Limpiar Filtros</a>
         </div>
     </form>
 
     <div th:if="${!compras.empty}">
-        <table class="table table-striped table-bordered">
-            <thead class="table-light">
-            <tr>
-                <th>ID</th>
-                <th>Fecha y Hora</th>
-                <th>Precio Total</th>
-                <th>Método de Entrega</th>
-                <th>Forma de Pago</th>
-                <th>Estado</th>
-                <th>Observación</th>
-                <th>Reseña</th>
-                <th>Acciones</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="compra : ${compras}">
-                <td th:text="${compra.idCompra}"></td>
-                <td th:text="${compra.fechaCreacionCompra != null ? #temporals.format(compra.fechaCreacionCompra, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
-                <td th:text="${compra.precioTotalCompra}"></td>
-                <td th:text="${compra.metodoEntregaCompra != null ? compra.metodoEntregaCompra.nombreMetodoEntrega : 'No especificado'}"></td>
-                <td th:text="${compra.formaPagoCompra != null ? compra.formaPagoCompra.nombreFormaPago : 'No especificado'}"></td>
-                <td th:text="${compra.estadoCompra != null ? compra.estadoCompra.nombreEstado : 'No especificado'}"></td>
-                <td th:text="${compra.observacionCompra != null ? compra.observacionCompra : 'Sin Observación'}"></td>
-                <td th:text="${compra.reseñaCompra != null ? compra.reseñaCompra : 'Sin Reseña'}"></td>
-                <td>
-                    <button class="btn btn-info btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#detalleCompraModal"
-                            th:attr="data-id=${compra.idCompra}">
-                        <i class="fas fa-eye"></i> Ver Detalle
-                    </button>
-                    <a class="btn btn-warning btn-sm"
-                       th:href="@{/reseña-pedido/{id}(id=${compra.idCompra})}"
-                       th:classappend="${compra.estadoCompra.idEstado != 6} ? 'disabled' : ''"
-                       th:attr="aria-disabled=${compra.estadoCompra.idEstado != 6}"
-                       aria-label="Dejar reseña">
-                        <i class="fas fa-edit"></i> Dejar Reseña
-                    </a>
-                    <a class="btn btn-warning btn-sm"
-                       th:href="@{/descargar-factura/{id}(id=${compra.idCompra})}"
-                       th:classappend="${compra.estadoCompra.idEstado != 6} ? 'disabled' : ''"
-                       th:attr="aria-disabled=${compra.estadoCompra.idEstado != 6}"
-                       aria-label="Descargar factura">
-                        <i class="fas fa-download"></i> Descargar comprobante de pedido
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <div class="d-flex justify-content-center mt-3">
+
+        <div class="container">
+            <div class="table-responsive">
+                <table class="table table-custom table-striped table-bordered mb-5">
+                    <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha y Hora</th>
+                        <th>Precio Total</th>
+                        <th>Método de Entrega</th>
+                        <th>Forma de Pago</th>
+                        <th>Estado</th>
+                        <th>Observación</th>
+                        <th>Reseña</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="compra : ${compras}">
+                        <td th:text="${compra.idCompra}"></td>
+                        <td th:text="${compra.fechaCreacionCompra != null ? #temporals.format(compra.fechaCreacionCompra, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
+                        <td th:text="${compra.precioTotalCompra}"></td>
+                        <td th:text="${compra.metodoEntregaCompra != null ? compra.metodoEntregaCompra.nombreMetodoEntrega : 'No especificado'}"></td>
+                        <td th:text="${compra.formaPagoCompra != null ? compra.formaPagoCompra.nombreFormaPago : 'No especificado'}"></td>
+                        <td th:text="${compra.estadoCompra != null ? compra.estadoCompra.nombreEstado : 'No especificado'}"></td>
+                        <td th:text="${compra.observacionCompra != null ? compra.observacionCompra : 'Sin Observación'}"></td>
+                        <td th:text="${compra.reseñaCompra != null ? compra.reseñaCompra : 'Sin Reseña'}"></td>
+                        <td>
+                            <button class="btn btn-delete btn-sm mb-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#detalleCompraModal"
+                                    th:attr="data-id=${compra.idCompra}">
+                                <i class="fas fa-eye"></i> Ver Detalle
+                            </button>
+                            <a class="btn btn-delete btn-sm mb-2"
+                               th:href="@{/reseña-pedido/{id}(id=${compra.idCompra})}"
+                               th:classappend="${compra.estadoCompra.idEstado != 6} ? 'disabled' : ''"
+                               th:attr="aria-disabled=${compra.estadoCompra.idEstado != 6}"
+                               aria-label="Dejar reseña">
+                                <i class="fas fa-edit"></i> Dejar Reseña
+                            </a>
+                            <a class="btn btn-delete btn-sm mb-2"
+                               th:href="@{/descargar-factura/{id}(id=${compra.idCompra})}"
+                               th:classappend="${compra.estadoCompra.idEstado != 6} ? 'disabled' : ''"
+                               th:attr="aria-disabled=${compra.estadoCompra.idEstado != 6}"
+                               aria-label="Descargar factura">
+                                <i class="fas fa-download"></i> Descargar comprobante de pedido
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <footer class="bg-dark text-center text-white py-9 mt-5 fixed-bottom img-fluid">
+            <img src="1.png" alt="footer" style="max-width: 100%; height: auto;"/>
+        </footer>
+        <div class="d-flex justify-content-center mb-5">
             <nav aria-label="Paginación">
                 <ul class="pagination">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/mis-compras(page=${currentPage - 1})}">Anterior</a>
+                        <a class="page-link"
+                           th:href="@{/mis-compras(page=${currentPage - 1}, estadoCompra=${estadoSeleccionado})}">
+                            Anterior
+                        </a>
                     </li>
 
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                         th:classappend="${currentPage == i} ? 'active'">
-                        <a class="page-link" th:href="@{/mis-compras(page=${i})}" th:text="${i + 1}"></a>
+                        <a class="page-link"
+                           th:href="@{/mis-compras(page=${i}, estadoCompra=${estadoSeleccionado})}"
+                           th:text="${i + 1}"></a>
                     </li>
 
                     <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                        <a class="page-link" th:href="@{/mis-compras(page=${currentPage + 1})}">Siguiente</a>
+                        <a class="page-link"
+                           th:href="@{/mis-compras(page=${currentPage + 1}, estadoCompra=${estadoSeleccionado})}">
+                            Siguiente
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -125,7 +143,8 @@
     </div>
 </div>
 
-<div class="modal fade" id="detalleCompraModal" tabindex="-1" aria-labelledby="detalleCompraLabel" aria-hidden="true">
+<div class="modal fade" id="detalleCompraModal" tabindex="-1" aria-labelledby="detalleCompraLabel"
+     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

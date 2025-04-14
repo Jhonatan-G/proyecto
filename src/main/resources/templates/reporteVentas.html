@@ -4,166 +4,155 @@
     <meta charset="UTF-8">
     <title>Reporte de Ventas</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f9f9f9;
-        }
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        .table th {
-            background-color: #f8f9fa;
-        }
-        .chart-container {
-            width: 100% !important;
-            max-width: 400px;
-            height: 400px !important;
-            margin: auto;
-        }
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-    </style>
 </head>
-<body>
+<body class="bg-light d-flex justify-content-center align-items-center min-vh-100">
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
-    <h2 class="text-center">Reporte de Ventas</h2>
-
-    <form th:action="@{/reporte-ventas/generar}" method="get" class="row g-3 mb-4">
-        <div class="col-md-4">
-            <label for="fechaInicio" class="form-label">Fecha Inicio</label>
-            <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
-        </div>
-        <div class="col-md-4">
-            <label for="fechaFin" class="form-label">Fecha Fin</label>
-            <input type="date" class="form-control" id="fechaFin" name="fechaFin">
-        </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary">Generar Reporte</button>
-        </div>
-
-        <div class="text-center mt-4">
-            <a id="btnExcel" href="/reporte-ventas/exportar-excel" class="btn btn-success disabled">
-                Descargar Excel
-            </a>
-            <a id="btnPDF" href="/reporte-ventas/exportar-pdf" class="btn btn-danger disabled">
-                Descargar PDF
-            </a>
-        </div>
-    </form>
-
-    <div class="row">
-        <div th:if="${ventasPorMes == null or #maps.isEmpty(ventasPorMes)}">
-            <p class="text-muted">No hay datos disponibles. Genera un reporte.</p>
-        </div>
-        <div class="col-md-6">
-            <div class="card p-3 mb-3">
-                <h4>Total de Ventas: <strong th:text="${totalVentas}"></strong></h4>
-                <h4>Ingresos Totales: <strong th:text="${#numbers.formatInteger(ingresosTotales, 0, 'COMMA')}"></strong>
-                </h4>
-            </div>
-        </div>
+<div class="bg-F3EBE1 mt-5">
+    <div class="container d-flex flex-column justify-content-center align-items-center w-100 p-3">
     </div>
 
-    <div class="row">
-        <div class="col-md-6" th:if="${ventasPorMes != null and not #maps.isEmpty(ventasPorMes)}">
-            <h5>Ventas por Mes</h5>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                <tr>
-                    <th>Mes</th>
-                    <th>Ventas</th>
-                    <th>Ingresos Totales</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="entry : ${ventasPorMes}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                    <td th:text="${#numbers.formatInteger(ingresosPorMes[entry.key], 0, 'COMMA')}"></td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="chart-container">
-                <canvas id="ventasMesChart"></canvas>
+    <h2 class="text-center text-brown mb-5">Reporte de Ventas</h2>
+
+    <div class="container mt-2">
+        <form th:action="@{/reporte-ventas/generar}" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
             </div>
-            <div class="chart-container">
-                <canvas id="ingresosMesChart"></canvas>
+            <div class="col-md-4">
+                <label for="fechaFin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fechaFin" name="fechaFin">
+            </div>
+            <div class="col-md-4 align-self-end">
+                <button type="submit" class="btn btn-custom shadow">Generar Reporte</button>
+            </div>
+
+            <div class="text-center mt-4">
+                <a id="btnExcel" href="/reporte-ventas/exportar-excel" class="btn btn-reportes btn-sm disabled">
+                    Descargar Excel
+                </a>
+                <a id="btnPDF" href="/reporte-ventas/exportar-pdf" class="btn btn-reportes btn-sm disabled">
+                    Descargar PDF
+                </a>
+            </div>
+        </form>
+
+        <div class="row">
+            <div th:if="${ventasPorMes == null or #maps.isEmpty(ventasPorMes)}">
+                <p class="text-muted">No hay datos disponibles. Genera un reporte.</p>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3 mb-3">
+                    <h4>Total de Ventas: <strong th:text="${totalVentas}"></strong></h4>
+                    <h4>Ingresos Totales: <strong
+                            th:text="${#numbers.formatInteger(ingresosTotales, 0, 'COMMA')}"></strong>
+                    </h4>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <h5>Productos Más Vendidos</h5>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad Vendida</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="entry : ${productosMasVendidos}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="chart-container">
-                <canvas id="productosChart"></canvas>
+        <div class="row">
+            <div class="col-md-6" th:if="${ventasPorMes != null and not #maps.isEmpty(ventasPorMes)}">
+                <h5>Ventas por Mes</h5>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Mes</th>
+                        <th>Ventas</th>
+                        <th>Ingresos Totales</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${ventasPorMes}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value}"></td>
+                        <td th:text="${#numbers.formatInteger(ingresosPorMes[entry.key], 0, 'COMMA')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container">
+                    <canvas id="ventasMesChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ingresosMesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h5>Productos Más Vendidos</h5>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad Vendida</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${productosMasVendidos}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container">
+                    <canvas id="productosChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <h5>Clientes Frecuentes</h5>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Celular</th>
-                    <th>Compras Realizadas</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="entry : ${clientesFrecuentes}">
-                    <td th:text="${entry.key?.nombre}"></td>
-                    <td th:text="${entry.key.apellido}"></td>
-                    <td th:text="${entry.key.celular}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="chart-container">
-                <canvas id="clientesChart"></canvas>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Clientes Frecuentes</h5>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Celular</th>
+                        <th>Compras Realizadas</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${clientesFrecuentes}">
+                        <td th:text="${entry.key?.nombre}"></td>
+                        <td th:text="${entry.key.apellido}"></td>
+                        <td th:text="${entry.key.celular}"></td>
+                        <td th:text="${entry.value}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container">
+                    <canvas id="clientesChart"></canvas>
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-6">
-            <h5>Métodos de Pago Usados</h5>
-            <table class="table table-striped table-bordered">
-                <thead class="table-light">
-                <tr>
-                    <th>Método de Pago</th>
-                    <th>Cantidad de Compras</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="entry : ${metodosPago}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="chart-container">
-                <canvas id="metodosPagoChart"></canvas>
+            <div class="col-md-6">
+                <h5>Métodos de Pago Usados</h5>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Método de Pago</th>
+                        <th>Cantidad de Compras</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${metodosPago}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="chart-container">
+                    <canvas id="metodosPagoChart"></canvas>
+                </div>
             </div>
         </div>
     </div>

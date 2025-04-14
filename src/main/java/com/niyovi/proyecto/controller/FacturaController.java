@@ -46,7 +46,7 @@ public class FacturaController {
                 System.err.println("No se pudo cargar el logo: " + e.getMessage());
             }
             Font boldFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
-            Paragraph titulo = new Paragraph("FACTURA DE COMPRA", boldFont);
+            Paragraph titulo = new Paragraph("COMPROBANTE DE PEDIDO", boldFont);
             titulo.setAlignment(Element.ALIGN_CENTER);
             titulo.setSpacingAfter(10);
             document.add(titulo);
@@ -98,11 +98,11 @@ public class FacturaController {
             document.add(table);
             document.close();
             response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=factura_" + idCompra + ".pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=comprobante_" + idCompra + ".pdf");
             response.getOutputStream().write(out.toByteArray());
             response.getOutputStream().flush();
         } catch (DocumentException | IOException e) {
-            throw new RuntimeException("Error al generar la factura", e);
+            throw new RuntimeException("Error al generar el comprobante", e);
         }
     }
 }

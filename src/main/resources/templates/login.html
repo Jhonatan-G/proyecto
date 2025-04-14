@@ -23,7 +23,7 @@
     <h2 class="text-center text-brown">Ingresa ahora</h2>
 
     <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <p>Credenciales incorrectas. Inténtalo de nuevo.</p>
+        <p>Credenciales incorrectas. Inténtelo de nuevo.</p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <div th:if="${param.logout}" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -47,14 +47,16 @@
             <div class="input-group-text bg-Light">
                 <i class="bi bi-person"></i>
             </div>
-            <input type="text" class="form-control" id="usuarioUsuario" name="username" required>
+            <input type="text" class="form-control input-custom" id="usuarioUsuario" name="username"
+                   placeholder="Usuario" required/>
         </div>
 
         <div class="input-group mt-2">
             <div class="input-group-text bg-Light">
                 <i class="bi bi-lock"></i>
             </div>
-            <input type="password" class="form-control" id="claveUsuario" name="password" required>
+            <input type="password" class="form-control input-custom" id="claveUsuario" name="password"
+                   placeholder="Contraseña" required/>
         </div>
 
         <div class="text-decoration-none text-info fw-semibold mt-4">
@@ -63,7 +65,7 @@
         </div>
 
         <div class="text-center mt-4">
-            <button type="submit" class="btn btn-custom shadow">Iniciar Sesión</button>
+            <button type="submit" class="btn btn-custom shadow">Ingresar</button>
         </div>
 
         <footer class="bg-dark text-center text-white py-9 mt-10 fixed-bottom img-fluid">

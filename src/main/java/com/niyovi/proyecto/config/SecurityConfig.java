@@ -31,7 +31,7 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/imagenes/**", "/logo.png",
                                 "/1.png", "/2.png", "/3.png", "/Lock.png", "/5.png",
                                 "/login.png", "/nequi.png", "/daviplata.png", "/efectivo.png",
-                                "/qr_nequi.jpg"
+                                "/qr_nequi.jpg", "/Extra1.jpeg", "/Extra2.jpeg"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

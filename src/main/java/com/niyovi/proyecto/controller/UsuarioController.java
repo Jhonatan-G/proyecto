@@ -177,12 +177,12 @@ public class UsuarioController {
     }
 
     @PostMapping("/recuperar-contraseña")
-    public String procesarRecuperarContraseña(@ModelAttribute("usuario") Usuario usuario, Model model, HttpSession session) {
+    public String procesarRecuperarContraseña(@ModelAttribute("usuario") Usuario usuario, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
             TipoDocumento tipoDocumento = tipoDocumentoService.obtenerPorId(usuario.getTipoDocUsuario().getIdTipoDoc());
             Usuario usuarioExistente = usuarioService.buscarPorDocumentoYCorreo(tipoDocumento, usuario.getNumeroDocUsuario(), usuario.getCorreoUsuario());
             if (usuarioExistente == null) {
-                model.addAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
+                redirectAttributes.addFlashAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
                 Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
                 List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
                 model.addAttribute("tiposDocumento", tiposDocumento);
@@ -192,14 +192,14 @@ public class UsuarioController {
             usuarioService.actualizarClaveTemporal(usuarioExistente, claveTemporal, session);
             usuarioService.enviarCorreoRecuperacion(usuarioExistente.getCorreoUsuario(), claveTemporal);
             session.setAttribute("usuarioRecuperacion", usuarioExistente);
-            model.addAttribute("mensajeExito", "Revisa la bandeja de entrada de tu correo electrónico para asignar la nueva contraseña.");
+            redirectAttributes.addFlashAttribute("mensajeExito", "Revisa la bandeja de entrada de tu correo electrónico para asignar la nueva contraseña.");
         } catch (Exception e) {
-            model.addAttribute("mensajeError", "Error al procesar la recuperación de contraseña: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar la recuperación de contraseña: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
         }
-        return "index";
+        return "redirect:/login";
     }
 
     @GetMapping("/cambiar-contrasena")
@@ -216,7 +216,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/cambiar-contrasena")
-    public String procesarCambioContraseña(@ModelAttribute("usuario") Usuario usuario, Model model, HttpSession session, Principal principal) {
+    public String procesarCambioContraseña(@ModelAttribute("usuario") Usuario usuario, Model model, HttpSession session, Principal principal, RedirectAttributes redirectAttributes) {
         if (!usuario.getNuevaClave().equals(usuario.getConfirmarClave())) {
             model.addAttribute("mensajeError", "Las contraseñas no coinciden.");
             return "cambiarContraseña";
@@ -225,14 +225,14 @@ public class UsuarioController {
         if (usuarioExistente != null) {
             usuarioService.cambiarClave(usuarioExistente, usuario.getNuevaClave());
             session.removeAttribute("usuarioRecuperacion");
-            model.addAttribute("mensajeExito", "Contraseña actualizada correctamente.");
+            redirectAttributes.addFlashAttribute("mensajeExito", "Contraseña actualizada correctamente.");
         } else {
-            model.addAttribute("mensajeError", "Usuario no encontrado.");
+            redirectAttributes.addFlashAttribute("mensajeError", "Usuario no encontrado.");
         }
         Usuario usuarioe = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuarioe.getRolUsuario();
         model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        return "index";
+        return "redirect:/catalogo-productos";
     }
 
     @GetMapping("/recuperar-usuario")
@@ -245,26 +245,26 @@ public class UsuarioController {
     }
 
     @PostMapping("/recuperar-usuario")
-    public String procesarRecuperarUsuario(@ModelAttribute("usuario") Usuario usuario, Model model, Principal principal) {
+    public String procesarRecuperarUsuario(@ModelAttribute("usuario") Usuario usuario, Model model, Principal principal, RedirectAttributes redirectAttributes) {
         try {
             TipoDocumento tipoDocumento = tipoDocumentoService.obtenerPorId(usuario.getTipoDocUsuario().getIdTipoDoc());
             Usuario usuarioExistente = usuarioService.buscarPorDocumentoYCorreo(tipoDocumento, usuario.getNumeroDocUsuario(), usuario.getCorreoUsuario());
             if (usuarioExistente == null) {
-                model.addAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
+                redirectAttributes.addFlashAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
                 Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
                 List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
                 model.addAttribute("tiposDocumento", tiposDocumento);
                 return "recuperarUsuario";
             }
             usuarioService.enviarCorreoRecuperacionUsuario(usuarioExistente.getCorreoUsuario(), usuarioExistente.getUsuarioUsuario());
-            model.addAttribute("mensajeExito", "El nombre de usuario ha sido enviado a tu correo.");
+            redirectAttributes.addFlashAttribute("mensajeExito", "El nombre de usuario ha sido enviado a tu correo.");
         } catch (Exception e) {
-            model.addAttribute("mensajeError", "Error al procesar la recuperación de usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar la recuperación de usuario: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
         }
-        return "index";
+        return "redirect:/login";
     }
 
     @GetMapping("/consultar-usuarios")

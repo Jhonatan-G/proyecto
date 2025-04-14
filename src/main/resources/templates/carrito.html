@@ -6,230 +6,203 @@
     <title>Carrito Compras</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .product-img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-        }
-        .summary-box {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        .cart-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .cart-item:last-child {
-            border-bottom: none;
-        }
-        .cart-item .product-details {
-            flex-grow: 1;
-            margin-left: 15px;
-        }
-        .cart-item h5,
-        .cart-item p {
-            margin: 0;
-            padding: 0;
-        }
-        .cart-item .quantity-controls {
-            display: flex;
-            align-items: center;
-            margin-left: 15px;
-        }
-        .quantity-controls input {
-            width: 50px;
-            text-align: center;
-        }
-        .summary-total {
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
 <body>
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
-
-    <h2 class="text-center">Carrito Compras</h2>
-
-    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeExito}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <p th:text="${mensajeError}"></p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="bg-F3EBE1 mt-3">
+    <div class="container d-flex justify-content-center align-items-center w-100 p-3">
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div id="carrito-items">
-            </div>
+    <h2 class="text-center text-brown mt-5">Carrito Compras</h2>
+
+    <div class="container mt-1">
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeExito}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <p th:text="${mensajeError}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <div class="col-md-4">
-            <div class="summary-box">
-                <h5>Resumen de la Orden</h5>
-                <p>Productos: <span id="total-productos">0</span></p>
-                <p>Subtotal: <span id="subtotal">$0</span></p>
-                <p class="summary-total">Total: <span id="total">$0</span></p>
-                <a id="finalizarCompraBtn"
-                   class="btn btn-primary w-100"
-                   th:href="${usuario != null ? '/confirmar-datos-compra' : '#'}"
-                   th:data-bs-toggle="${usuario == null ? 'modal' : ''}"
-                   th:data-bs-target="${usuario == null ? '#loginModal' : ''}">
-                    Finalizar Compra
-                </a>
-                <p class="me-3 mt-3 mb-2">Realiza tu pago seguro fácilmente con:</p>
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <img src="/nequi.png" alt="Nequi" style="width: 40px;">
-                        <p class="mb-0">Nequi</p>
-                    </div>
-                    <div class="me-3">
-                        <img src="daviplata.png" alt="Daviplata" style="width: 40px;">
-                        <p class="mb-0">Daviplata</p>
-                    </div>
-                    <div class="me-3">
-                        <img src="efectivo.png" alt="Efectivo" style="width: 40px;">
-                        <p class="mb-0">Efectivo</p>
+        <div class="row">
+            <div class="col-md-8">
+                <div id="carrito-vacio" class="alert alert-warning text-center mt-3 d-none">
+                    Tu carrito está vacío.
+                </div>
+                <div id="carrito-items"></div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="summary-box">
+                    <h5 class="text-brown">Resumen de la Orden</h5>
+                    <p class="text-brown">Productos: <span id="total-productos">0</span></p>
+                    <p class="text-brown">Subtotal: <span id="subtotal">$0</span></p>
+                    <p class="summary-total text-brown">Total: <span id="total">$0</span></p>
+                    <a id="finalizarCompraBtn"
+                       class="btn btn-secondary w-100"
+                       th:href="${usuario != null ? '/confirmar-datos-compra' : '#'}"
+                       th:data-bs-toggle="${usuario == null ? 'modal' : ''}"
+                       th:data-bs-target="${usuario == null ? '#loginModal' : ''}">
+                        Finalizar Compra
+                    </a>
+                    <p class="me-3 mt-3 mb-2 text-brown">Realiza tu pago seguro fácilmente con:</p>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <img src="/nequi.png" alt="Nequi" style="width: 40px;">
+                            <p class="mb-0 text-brown">Nequi</p>
+                        </div>
+                        <div class="me-3">
+                            <img src="daviplata.png" alt="Daviplata" style="width: 40px;">
+                            <p class="mb-0 text-brown">Daviplata</p>
+                        </div>
+                        <div class="me-3">
+                            <img src="efectivo.png" alt="Efectivo" style="width: 40px;">
+                            <p class="mb-0 text-brown">Efectivo</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loginModalLabel">¿Ya tienes una cuenta?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Para continuar con tu compra, por favor inicia sesión o regístrate.</p>
-                <button type="button" class="btn btn-primary"
-                        onclick="window.location.href='/login?from=finalizarCompra'">Iniciar Sesión
-                </button>
-                <button type="button" class="btn btn-secondary"
-                        onclick="window.location.href='/registrarse?from=finalizarCompra'">Registrarse
-                </button>
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">¿Ya tienes una cuenta?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Para continuar con tu compra, por favor inicia sesión o regístrate.</p>
+                    <button type="button" class="btn btn-secondary"
+                            onclick="window.location.href='/login?from=finalizarCompra'">Iniciar Sesión
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            onclick="window.location.href='/registrarse?from=finalizarCompra'">Registrarse
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        mostrarCarrito();
-        actualizarCarrito();
-    });
-
-    function mostrarCarrito() {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        if (!cart || typeof cart !== 'object') {
-            console.error('Error: El carrito no tiene el formato correcto.');
-            return;
-        }
-        let carritoContainer = document.getElementById('carrito-items');
-        carritoContainer.innerHTML = '';
-        let totalProductos = 0;
-        let subtotal = 0;
-        Object.keys(cart).forEach(productId => {
-            let { cantidad, nombre, precio, descripcion, imagen } = cart[productId];
-            subtotal += precio * cantidad;
-            carritoContainer.innerHTML += `
-                <div class="cart-item">
-                    <img src="${imagen}" class="product-img" alt="${nombre}">
-                    <div class="product-details">
-                        <h5>${nombre}</h5>
-                        <p>${descripcion}</p>
-                        <p class="text-danger fw-bold">$${formatoPrecio(precio)}</p>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity('${productId}')">-</button>
-                        <input type="number" class="form-control cantidad-input" id="cantidad-${productId}" value="${cantidad}" min="1" max="1000" onchange="updateQuantity('${productId}')" style="width: 100px;">
-                        <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity('${productId}')">+</button>
-                    </div>
-                    <button class="btn btn-danger ms-3" onclick="eliminarProducto('${productId}')">Eliminar</button>
-                </div>`;
-            totalProductos += cantidad;
+    <footer class="bg-dark text-center text-white py-9 mt-10 fixed-bottom img-fluid mt-5">
+        <img src="1.png" alt="footer" style="max-width: 100%; height: auto;"/>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            mostrarCarrito();
+            actualizarCarrito();
         });
-        document.getElementById('total-productos').innerText = totalProductos;
-        document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
-        document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
-    }
 
-    function actualizarCarrito() {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
-        const cartCountElement = document.getElementById('cart-count');
-        cartCountElement.textContent = totalItems;
-    }
-
-    function increaseQuantity(productId) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        if (cart[productId]) {
-            cart[productId].cantidad++;
-            document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+        function mostrarCarrito() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let mensajeVacio = document.getElementById('carrito-vacio');
+            if (Object.keys(cart).length === 0) {
+                mensajeVacio.classList.remove('d-none');
+            } else {
+                mensajeVacio.classList.add('d-none');
+            }
+            if (!cart || typeof cart !== 'object') {
+                console.error('Error: El carrito no tiene el formato correcto.');
+                return;
+            }
+            let carritoContainer = document.getElementById('carrito-items');
+            carritoContainer.innerHTML = '';
+            let totalProductos = 0;
+            let subtotal = 0;
+            Object.keys(cart).forEach(productId => {
+                let { cantidad, nombre, precio, descripcion, imagen } = cart[productId];
+                subtotal += precio * cantidad;
+                carritoContainer.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${imagen}" class="product-imgc" alt="${nombre}">
+                        <div class="product-details">
+                            <h5 class="text-brown">${nombre}</h5>
+                            <p class="text-brown">${descripcion}</p>
+                            <p class="text-danger fw-bold">$${formatoPrecio(precio)}</p>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity('${productId}')">-</button>
+                            <input type="number" class="form-control cantidad-input" id="cantidad-${productId}" value="${cantidad}" min="1" max="1000" onchange="updateQuantity('${productId}')" style="width: 100px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity('${productId}')">+</button>
+                        </div>
+                        <button class="btn btn-secondary ms-3" onclick="eliminarProducto('${productId}')">Eliminar</button>
+                    </div>`;
+                totalProductos += cantidad;
+            });
+            document.getElementById('total-productos').innerText = totalProductos;
+            document.getElementById('subtotal').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
+            document.getElementById('total').innerText = `$${formatoPrecio(subtotal.toFixed(0))}`;
         }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        mostrarCarrito();
-        actualizarCarrito();
-    }
 
-    function decreaseQuantity(productId) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        if (cart[productId].cantidad > 1) {
-            cart[productId].cantidad--;
-            document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
-        } else {
+        function actualizarCarrito() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let totalItems = Object.values(cart).reduce((acc, item) => acc + item.cantidad, 0);
+            const cartCountElement = document.getElementById('cart-count');
+            cartCountElement.textContent = totalItems;
+        }
+
+        function increaseQuantity(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            if (cart[productId]) {
+                cart[productId].cantidad++;
+                document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            mostrarCarrito();
+            actualizarCarrito();
+        }
+
+        function decreaseQuantity(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            if (cart[productId].cantidad > 1) {
+                cart[productId].cantidad--;
+                document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+            } else {
+                delete cart[productId];
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            mostrarCarrito();
+            actualizarCarrito();
+        }
+
+        function updateQuantity(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let inputElement = document.getElementById(`cantidad-${productId}`);
+            let nuevaCantidad = parseInt(inputElement.value);
+            if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+                inputElement.value = cart[productId].cantidad;
+                return;
+            }
+            cart[productId].cantidad = nuevaCantidad;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            mostrarCarrito();
+            actualizarCarrito();
+        }
+
+        function eliminarProducto(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || {};
             delete cart[productId];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            mostrarCarrito();
+            actualizarCarrito();
         }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        mostrarCarrito();
-        actualizarCarrito();
-    }
 
-    function updateQuantity(productId) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        let inputElement = document.getElementById(`cantidad-${productId}`);
-        let nuevaCantidad = parseInt(inputElement.value);
-        if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
-            inputElement.value = cart[productId].cantidad;
-            return;
+        function formatoPrecio(precio) {
+            return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
-        cart[productId].cantidad = nuevaCantidad;
-        localStorage.setItem('cart', JSON.stringify(cart));
-        mostrarCarrito();
-        actualizarCarrito();
-    }
 
-    function eliminarProducto(productId) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || {};
-        delete cart[productId];
-        localStorage.setItem('cart', JSON.stringify(cart));
-        mostrarCarrito();
-        actualizarCarrito();
-    }
-
-    function formatoPrecio(precio) {
-        return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function obtenerCarritoJSON() {
-        return JSON.stringify(localStorage.getItem('cart'));
-    }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-
+        function obtenerCarritoJSON() {
+            return JSON.stringify(localStorage.getItem('cart'));
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</div>
 </body>
 </html>

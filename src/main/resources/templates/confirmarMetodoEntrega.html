@@ -6,25 +6,20 @@
     <title>Confirmar Método Entrega</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .summary-box {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        .summary-total {
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/iconos/login.svg">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 </head>
 <body>
 
 <div th:replace="~{index :: menu}"></div>
 
-<div class="container mt-5">
+<div class="bg-F3EBE1 mt-5">
+    <div class="container d-flex flex-column justify-content-center align-items-center w-100 p-3">
+    </div>
 
-    <h2 class="text-center">Confirmar Método Entrega</h2>
+    <h2 class="text-center text-brown mb-5">Confirmar Método Entrega</h2>
 
     <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
         <p th:text="${mensajeExito}"></p>
@@ -37,12 +32,10 @@
 
     <div class="row">
         <div class="col-md-8">
-            <h3>Selecciona un método de entrega</h3>
+            <h3 class="text-brown">Selecciona un método de entrega</h3>
             <form id="confirmarMetodoEntrega" th:action="@{/guardar-metodo-entrega}" method="post">
-
                 <input type="hidden" id="carritoOculto" name="carritoOculto">
-
-                <div th:each="metodoEntrega : ${metodosEntrega}">
+                <div class="text-brown" th:each="metodoEntrega : ${metodosEntrega}">
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="radio" name="metodoEntregaSeleccionado"
                                th:id="'metodo-' + ${metodoEntrega.idMetodoEntrega}"
@@ -57,32 +50,38 @@
 
         <div class="col-md-4">
             <div class="summary-box">
-                <h5>Resumen de la Orden</h5>
-                <p>Productos: <span id="total-productos">0</span></p>
-                <p>Subtotal: <span id="subtotal">$0</span></p>
+                <h5 class="text-brown">Resumen de la Orden</h5>
+                <p class="text-brown">Productos: <span id="total-productos">0</span></p>
+                <p class="text-brown">Subtotal: <span id="subtotal">$0</span></p>
                 <p class="summary-total">Total: <span id="total">$0</span></p>
-                <button class="btn btn-primary w-100" id="finalizar-compra" onclick="finalizarCompra()">Confirmar Método
+                <button class="btn btn-secondary w-100" id="finalizar-compra" onclick="finalizarCompra()">Confirmar
+                    Método
                     Entrega
                 </button>
-                <p class="me-3 mt-3 mb-2">Realiza tu pago seguro fácilmente con:</p>
+                <p class="me-3 mt-3 mb-2 text-brown">Realiza tu pago seguro fácilmente con:</p>
                 <div class="d-flex align-items-center">
                     <div class="me-3">
                         <img src="/nequi.png" alt="Nequi" style="width: 40px;">
-                        <p class="mb-0">Nequi</p>
+                        <p class="mb-0 text-brown">Nequi</p>
                     </div>
                     <div class="me-3">
                         <img src="daviplata.png" alt="Daviplata" style="width: 40px;">
-                        <p class="mb-0">Daviplata</p>
+                        <p class="mb-0 text-brown">Daviplata</p>
                     </div>
                     <div class="me-3">
                         <img src="efectivo.png" alt="Efectivo" style="width: 40px;">
-                        <p class="mb-0">Efectivo</p>
+                        <p class="mb-0 text-brown">Efectivo</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
+
+<footer class="bg-dark text-center text-white py-9 fixed-bottom img-fluid">
+    <img src="1.png" alt="footer" style="max-width: 100%; height: auto;"/>
+</footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

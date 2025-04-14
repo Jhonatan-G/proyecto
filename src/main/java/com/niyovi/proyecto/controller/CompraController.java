@@ -335,9 +335,6 @@ public class CompraController {
         Usuario usuario = usuarioService.buscarPorUsuario(principal.getName());
         Rol rolUsuario = usuario.getRolUsuario();
         model.addAttribute("rolUsuario", rolUsuario.getIdRol());
-        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L, 7L, 8L);
-        List<Estado> estados = estadoService.listarEstadosParaPedidos(idsEstadosPedidos);
-        model.addAttribute("estados", estados);
         Pageable pageable = PageRequest.of(page, 5);
         Page<Compra> compras;
         if (estadoCompraId != null) {
@@ -349,6 +346,9 @@ public class CompraController {
         model.addAttribute("compras", compras.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", compras.getTotalPages());
+        List<Long> idsEstadosPedidos = List.of(3L, 4L, 5L, 6L, 7L, 8L);
+        List<Estado> estados = estadoService.listarEstadosParaPedidos(idsEstadosPedidos);
+        model.addAttribute("estados", estados);
         model.addAttribute("estadoSeleccionado", estadoCompraId);
         return "pedidos";
     }
