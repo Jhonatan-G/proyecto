@@ -253,7 +253,6 @@ public class CompraController {
                 detalle.setCompraDetalle(compra);
                 detalles.add(detalle);
                 totalCompra += detalle.getSubtotalDetalle();
-                productoExistente.setStockProducto(productoExistente.getStockProducto() - productoCarrito.getCantidadCarrito());
                 productoRepository.save(productoExistente);
                 int nuevoStock = productoExistente.getStockProducto() - productoCarrito.getCantidadCarrito();
                 productoExistente.setStockProducto(nuevoStock);

@@ -32,10 +32,6 @@
 
     <form th:action="@{/mis-compras}" method="get" class="mb-4">
 
-        <div th:if="${compras.empty}" class="alert alert-warning text-center">
-            No has realizado ninguna compra todavía.
-        </div>
-
         <input type="hidden" id="compraExitosa" th:value="${compraExitosa != null ? 'true' : 'false'}">
 
         <div class="row mb-3">
@@ -49,6 +45,10 @@
                     </select>
                 </div>
             </div>
+        </div>
+        <div th:if="${compras.empty}" class="alert alert-warning text-center mb-4"
+             style="width: 1000px; max-width: none; margin: 0 auto; word-wrap: break-word;">
+            No has realizado ninguna compra todavía.
         </div>
         <div class="text-center">
             <button type="submit" class="btn btn-custom shadow">Consultar</button>
