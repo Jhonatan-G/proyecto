@@ -33,6 +33,9 @@
 
         <div class="row">
             <div class="col-md-8">
+                <div id="mensajeStock" class="alert alert-warning d-none" role="alert">
+                    <span id="mensajeStockText"></span>
+                </div>
                 <div id="carrito-vacio" class="alert alert-warning text-center mt-3 d-none">
                     Tu carrito está vacío.
                 </div>
@@ -129,7 +132,7 @@
                         </div>
                         <div class="quantity-controls">
                             <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity('${productId}')">-</button>
-                            <input type="number" class="form-control cantidad-input" id="cantidad-${productId}" value="${cantidad}" min="1" max="1000" onchange="updateQuantity('${productId}')" style="width: 100px;">
+                            <input type="number" class="form-control cantidad-input" id="cantidad-${productId}" value="${cantidad}" min="1" max="${cart[productId].stock}" onchange="updateQuantity('${productId}')" style="width: 100px;">
                             <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity('${productId}')">+</button>
                         </div>
                         <button class="btn btn-secondary ms-3" onclick="eliminarProducto('${productId}')">Eliminar</button>
@@ -150,9 +153,21 @@
 
         function increaseQuantity(productId) {
             let cart = JSON.parse(localStorage.getItem('cart')) || {};
-            if (cart[productId]) {
-                cart[productId].cantidad++;
-                document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+            let mensajeStock = document.getElementById('mensajeStock');
+            if (cart[productId] && cart[productId].stock != undefined) {
+                if (cart[productId].cantidad < cart[productId].stock) {
+                    cart[productId].cantidad++;
+                    document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+                    if (mensajeStock) mensajeStock.classList.add('d-none');
+                } else {
+                    if (mensajeStock) {
+                        mensajeStock.classList.remove('d-none');
+                        mensajeStock.innerText = `No puedes agregar más de ${cart[productId].stock} unidades de ${cart[productId].nombre}.`;
+                        setTimeout(function() {
+                            mensajeStock.classList.add('d-none');
+                        }, 3000);
+                    }
+                }
             }
             localStorage.setItem('cart', JSON.stringify(cart));
             mostrarCarrito();
@@ -161,9 +176,11 @@
 
         function decreaseQuantity(productId) {
             let cart = JSON.parse(localStorage.getItem('cart')) || {};
+            let mensajeStock = document.getElementById('mensajeStock');
             if (cart[productId].cantidad > 1) {
                 cart[productId].cantidad--;
                 document.getElementById(`cantidad-${productId}`).value = cart[productId].cantidad;
+                if (mensajeStock) mensajeStock.classList.add('d-none');
             } else {
                 delete cart[productId];
             }
@@ -176,11 +193,27 @@
             let cart = JSON.parse(localStorage.getItem('cart')) || {};
             let inputElement = document.getElementById(`cantidad-${productId}`);
             let nuevaCantidad = parseInt(inputElement.value);
+            let mensajeStock = document.getElementById('mensajeStock');
             if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
                 inputElement.value = cart[productId].cantidad;
                 return;
             }
-            cart[productId].cantidad = nuevaCantidad;
+            if (cart[productId] && cart[productId].stock != undefined) {
+                if (nuevaCantidad <= cart[productId].stock) {
+                    cart[productId].cantidad = nuevaCantidad;
+                    if (mensajeStock) mensajeStock.classList.add('d-none');
+                } else {
+                    inputElement.value = cart[productId].stock;
+                    cart[productId].cantidad = cart[productId].stock;
+                    if (mensajeStock) {
+                        mensajeStock.classList.remove('d-none');
+                        mensajeStock.innerText = `No puedes agregar más de ${cart[productId].stock} unidades de ${cart[productId].nombre}.`;
+                        setTimeout(function() {
+                            mensajeStock.classList.add('d-none');
+                        }, 3000);
+                    }
+                }
+            }
             localStorage.setItem('cart', JSON.stringify(cart));
             mostrarCarrito();
             actualizarCarrito();

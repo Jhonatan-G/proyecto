@@ -162,14 +162,15 @@
         input.value = parseInt(input.value) + 1;
     }
 
-    function agregarAlCarrito(productId, cantidad, nombreProducto, precioProducto, descripcionProducto, imagenProducto) {
+    function agregarAlCarrito(productId, cantidad, nombreProducto, precioProducto, descripcionProducto, imagenProducto, stockProducto) {
         let cart = JSON.parse(localStorage.getItem('cart')) || {};
         cart[productId] = {
             cantidad: (cart[productId]?.cantidad || 0) + cantidad,
             nombre: nombreProducto,
             precio: precioProducto,
             descripcion: descripcionProducto,
-            imagen: imagenProducto
+            imagen: imagenProducto,
+            stock: stockProducto
         };
         localStorage.setItem('cart', JSON.stringify(cart));
         actualizarCarrito();
@@ -189,7 +190,8 @@
             const precioProducto = card.querySelector('.text-danger').textContent.replace('$', '').replace('.', '');
             const descripcionProducto = card.querySelector('.card-text').textContent;
             const imagenProducto = card.querySelector('.card-img-top').src;
-            agregarAlCarrito(productId, parseInt(cantidad), nombreProducto, parseFloat(precioProducto), descripcionProducto, imagenProducto);
+            const stockProducto = parseInt(card.querySelector('.text-secondary span').textContent);
+            agregarAlCarrito(productId, parseInt(cantidad), nombreProducto, parseFloat(precioProducto), descripcionProducto, imagenProducto, stockProducto);
             mostrarMensaje("Producto agregado al carrito.");
         });
     });

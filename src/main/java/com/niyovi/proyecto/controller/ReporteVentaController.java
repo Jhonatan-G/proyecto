@@ -190,14 +190,15 @@ public class ReporteVentaController {
         anchor.setCol1(0);
         anchor.setRow1(0);
         anchor.setCol2(2);
-        anchor.setRow2(3);
+        anchor.setRow2(5);
         Picture pict = drawing.createPicture(anchor, pictureIdx);
         pict.resize(1.0);
-        int rowNum = 1;
+        int rowNum = 2;
         Row titleRow = sheet.createRow(rowNum++);
         Cell titleCell = titleRow.createCell(2);
         titleCell.setCellValue("REPORTE DE VENTAS");
         titleCell.setCellStyle(headerStyle);
+        rowNum++;
         rowNum++;
         rowNum++;
         Row empresaRow = sheet.createRow(rowNum++);
