@@ -413,3 +413,24 @@ canvas {
 .star-rating label:hover~label {
     color: #f39c12;
 }
+
+#loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+#loader-overlay p {
+    color: white;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}

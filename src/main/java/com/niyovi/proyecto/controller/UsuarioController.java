@@ -182,7 +182,7 @@ public class UsuarioController {
             TipoDocumento tipoDocumento = tipoDocumentoService.obtenerPorId(usuario.getTipoDocUsuario().getIdTipoDoc());
             Usuario usuarioExistente = usuarioService.buscarPorDocumentoYCorreo(tipoDocumento, usuario.getNumeroDocUsuario(), usuario.getCorreoUsuario());
             if (usuarioExistente == null) {
-                redirectAttributes.addFlashAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
+                model.addAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
                 Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
                 List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
                 model.addAttribute("tiposDocumento", tiposDocumento);
@@ -194,7 +194,7 @@ public class UsuarioController {
             session.setAttribute("usuarioRecuperacion", usuarioExistente);
             redirectAttributes.addFlashAttribute("mensajeExito", "Revisa la bandeja de entrada de tu correo electrónico para asignar la nueva contraseña.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar la recuperación de contraseña: " + e.getMessage());
+            model.addAttribute("mensajeError", "Error al procesar la recuperación de contraseña: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
@@ -250,7 +250,7 @@ public class UsuarioController {
             TipoDocumento tipoDocumento = tipoDocumentoService.obtenerPorId(usuario.getTipoDocUsuario().getIdTipoDoc());
             Usuario usuarioExistente = usuarioService.buscarPorDocumentoYCorreo(tipoDocumento, usuario.getNumeroDocUsuario(), usuario.getCorreoUsuario());
             if (usuarioExistente == null) {
-                redirectAttributes.addFlashAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
+                model.addAttribute("mensajeError", "Los datos no coinciden con ningún usuario registrado.");
                 Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
                 List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
                 model.addAttribute("tiposDocumento", tiposDocumento);
@@ -259,7 +259,7 @@ public class UsuarioController {
             usuarioService.enviarCorreoRecuperacionUsuario(usuarioExistente.getCorreoUsuario(), usuarioExistente.getUsuarioUsuario());
             redirectAttributes.addFlashAttribute("mensajeExito", "El nombre de usuario ha sido enviado a tu correo.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar la recuperación de usuario: " + e.getMessage());
+            model.addAttribute("mensajeError", "Error al procesar la recuperación de usuario: " + e.getMessage());
             Estado estadoActivo = estadoRepository.findById(1L).orElseThrow(() -> new RuntimeException("Estado activo no encontrado"));
             List<TipoDocumento> tiposDocumento = tipoDocumentoService.obtenerTiposDocumentoActivos(estadoActivo);
             model.addAttribute("tiposDocumento", tiposDocumento);
